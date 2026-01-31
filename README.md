@@ -490,15 +490,14 @@ buildsteps: |
 # build deps
 [] - GNU Make
 [] - libyaml
+[] - libcurl
 
 
 
 # runtime deps
 [] - Rsync
 [] - tar
-[] - wget
 [] - unzip
-[] - chroot
 [] - gnu make
 [] - autotools
 [] - zig

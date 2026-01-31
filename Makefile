@@ -1,6 +1,6 @@
 CC      := zig cc #clang # musl-clang
 CFLAGS  := -std=c99 -Wall -Wextra -Wpedantic -Wempty-translation-unit -O2 -g 
-LDFLAGS := -static
+LDFLAGS := -static -lyaml
 INCLUDES:= -Iinclude
 
 SRC := $(wildcard src/*.c)

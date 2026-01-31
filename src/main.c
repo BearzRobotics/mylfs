@@ -13,6 +13,8 @@
 #include <sys/wait.h>
 #include <limits.h>
 
+#include <yaml.h>
+
 #include "config.h"
 #include "dprint.h"
 
@@ -106,6 +108,149 @@ bool unmountBind(Config cfg, char *cpath) {
 }
 
 
+void print_yaml_event(yaml_event_t *event) {
+    switch (event->type) {
+        case YAML_NO_EVENT:       printf("YAML_NO_EVENT\n"); break;
+        case YAML_STREAM_START_EVENT:  printf("STREAM_START\n"); break;
+        case YAML_STREAM_END_EVENT:    printf("STREAM_END\n"); break;
+        case YAML_DOCUMENT_START_EVENT: printf("DOC_START\n"); break;
+        case YAML_DOCUMENT_END_EVENT:   printf("DOC_END\n"); break;
+        case YAML_MAPPING_START_EVENT:  printf("MAPPING_START\n"); break;
+        case YAML_MAPPING_END_EVENT:    printf("MAPPING_END\n"); break;
+        case YAML_SEQUENCE_START_EVENT: printf("SEQ_START\n"); break;
+        case YAML_SEQUENCE_END_EVENT:   printf("SEQ_END\n"); break;
+        case YAML_SCALAR_EVENT:
+            printf("SCALAR: %s\n", event->data.scalar.value);
+            break;
+        default:
+            printf("UNKNOWN_EVENT: %d\n", event->type);
+            break;
+    }
+}
+
+
+static bool parse_bool(const char *v) {
+    return strcmp(v, "true") == 0 || strcmp(v, "yes") == 0 || strcmp(v, "1") == 0;
+}
+
+int loadConfig(Config cfg, const char *cfpath){
+    
+    // cfg.debug won't work here because of where it's called  
+    // printf("[debug] loadConfig() cfpath: %s", cfpath);
+
+
+    FILE *fh = fopen(cfpath, "r");
+    if (!fh) {
+        perror("fopen");
+        exit(-1);
+    }
+
+    yaml_parser_t parser;
+    yaml_event_t event;
+
+    if (!yaml_parser_initialize(&parser)) {
+        fprintf(stderr, "Failed to initialize YAML parser\n");
+        fclose(fh);
+        exit(-1);
+    }
+
+    yaml_parser_set_input_file(&parser, fh);
+    char *current_key = NULL;
+
+    while (1) {
+        if (!yaml_parser_parse(&parser, &event)) {
+            fprintf(stderr, "YAML parse error\n");
+            goto error;
+        }
+
+        // cfg.debug won't work here because of where it's called            
+        // print_yaml_event(&event);
+      
+
+        if (event.type == YAML_SCALAR_EVENT) {
+            char *value = (char *)event.data.scalar.value;
+
+            if (!current_key) {
+                current_key = strdup(value);
+            } else {
+                // This scalar is a VALUE
+                if (strcmp(current_key, "lfs_tgt") == 0) {
+                    cfg.lfs_tgt = strdup(value);
+                } else if (strcmp(current_key, "test") == 0) {
+                    cfg.test = parse_bool(value);
+                } else if (strcmp(current_key, "cleanup_sources") == 0) {
+                    cfg.cleanup_src = parse_bool(value);
+                } else if (strcmp(current_key, "keep_logs") == 0) {
+                    cfg.keepLogs = parse_bool(value);
+                } else if (strcmp(current_key, "build_path") == 0) {
+                    cfg.buildPath = strdup(value);
+                } else if (strcmp(current_key, "recipes_path") == 0) {
+                    cfg.recipesPath = strdup(value);
+                } else if (strcmp(current_key, "bootstrap_only") == 0) {
+                    cfg.bootstrap = parse_bool(value);
+                } else if (strcmp(current_key, "version_check") == 0) {
+                    cfg.versionCheck = strdup(value);
+                }
+
+                free(current_key);
+                current_key = NULL;
+            }
+        }
+
+        if (event.type == YAML_STREAM_END_EVENT) {
+            yaml_event_delete(&event);
+            break;
+        }
+
+        yaml_event_delete(&event);
+    }
+
+    yaml_parser_delete(&parser);
+    fclose(fh);
+    return 0;
+
+    error:
+    yaml_event_delete(&event);
+    yaml_parser_delete(&parser);
+    fclose(fh);
+    return -1;
+}
+
+
+bool versionCheck(Config cfg) {
+    pid_t pid = fork();
+    if (pid <0) {
+        perror("fork");
+        return false;
+    }
+
+    if (pid == 0) {
+        char *argv[] = {
+            "bash",
+            "-c",
+            cfg.versionCheck,
+            NULL
+        };
+
+
+        if (execve("/usr/bin/bash", argv ,environ) != 0) {
+            perror("execve");
+            _exit(1);
+        }
+
+        _exit(0);
+    }
+
+    int status;
+    waitp(&status);
+
+    if (status == 0) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
 
 
 int main(int argc, char* argv[]) {
@@ -123,6 +268,10 @@ int main(int argc, char* argv[]) {
     // with the {0} fixed it.
     Config cfg = {0, .phase=0};
 
+    //load our yaml config. By loading it here it will allow our command line options to 
+    // override it.
+    loadConfig(cfg, "./config.yml");
+
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--debug") == 0) {
             cfg.debug = true;
@@ -137,7 +286,6 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "--chroot") == 0) {
             // unistd.h _GNU_SOURCE
             // chroot syscall only changes the root dir of the current process
-            char oldcwd[PATH_MAX];
             char *resolved = realpath(argv[i+1], NULL);
 
             if (!resolved) {
@@ -150,15 +298,11 @@ int main(int argc, char* argv[]) {
                 //exit(1); The system can build without these bind mounted
             }
 
-
-
-            
             pid_t pid = fork();
             if (pid < 0) {
                 perror("fork");
                 exit(1);
             }
-
             
             if (pid == 0) {
                 if (chroot(resolved) != 0) {
@@ -179,7 +323,7 @@ int main(int argc, char* argv[]) {
                 };
 
                 if (execve("/bin/sh", sh_argv, environ) != 0) {
-                    perror("execl\n");
+                    perror("execve\n");
                     _exit(1);
                 }
                 
@@ -188,11 +332,6 @@ int main(int argc, char* argv[]) {
             
             int status;
             wait(&status);
-
-            if (!getcwd(oldcwd, sizeof(oldcwd))) {
-                perror("getcwd");
-                exit(1);
-            }
 
             if (unmountBind(cfg, resolved) == false) {
                 failed("Could not unmount the bind dirs! dev:dev/pts:sys:proc:run\n ");
@@ -211,14 +350,21 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
-
     header("mylfs-c edition");
     if (cfg.debug == true) {
         printf("[Debug] Mode has been enabled!\n");
     }
 
-    // Load my yaml config
+
+    if (cfg.debug) {
+        printf("[debug] cfg.versionCheck: %s\n", cfg.versionCheck);
+    }
+
+    if (versionCheck(cfg) == false) {
+        failed("System does not meet the required build deps\n");
+        exit(1);
+    }
+
     // need to check for required tools
     // check if builderDir is empty 
     //      If it isn't ask if they want to delete it
