@@ -108,7 +108,8 @@
         incompatablities between the version of glibc used to build against and 
         the one ran against can create problems.
         
-        Man Pages made with grapse: https://roperzh.github.io/grapse/
+        It should also be noted that the python version may seem to have more 
+        functionality, but most of those features were never implemented.
 
 # AUTHOR
     Author: Dakota James Owen Keeler
