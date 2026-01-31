@@ -1,7 +1,7 @@
-CC      := clang # musl-clang
-CFLAGS  := -std=c11 -Wall -Wextra -Wpedantic -O2 -g -Ivendor/libyaml/include
+CC      := zig cc #clang # musl-clang
+CFLAGS  := -std=c99 -Wall -Wextra -Wpedantic -Wempty-translation-unit -O2 -g 
 LDFLAGS := -static
-INCLUDES:= -Ilib
+INCLUDES:= -Iinclude
 
 SRC := $(wildcard src/*.c)
 BIN := bin/mylfs

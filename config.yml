@@ -3,46 +3,25 @@
 # tabs do not work. -- spaces only
 
 # all paths are realtive paths to the where the script is executed! logs/ not 
-# /code/data/py/mylfs-py/logs  <- Absolute paths not support
+# /code/data/py/mylfs/logs  <- Absolute paths not support
 
 # LFS values
 # lft_tgt should be $(uname -m)-lfs-linux-gnu
 lfs_tgt: x86_64-lfs-linux-gnu
 
-# used for install
-lfs_fs: ext4
-lfs_rootlabel: LFSROOT
-lfs_efilabel: LFSEFI
-
-# the arch that should be targeted
-target_arch: x86_64
-
-# set the root passward
-root_password: password
-
 # should test be ran?
-run_test: false
-
-# make flags
-make_flags: -j8
+test: false
 
 # whether to keep extracted source after a succeful build
 cleanup_sources: true
 
-# Disable colored output from this program.
-# cannot guarentee that any other program that might print will
-# have color disabled
-disable_colors: false
-
 # keep log files
 keep_logs: true
 
-# Used to enable UEFI support
-uefi: false
-
-# build path is a relative path to the execution of the program
+# build path is a relative path to the execution of the program.
+# If your desired install drive is big enough it's not a bad idea
+# to mount it to the default location and build it in place.
 # default is "mnt/lfs/"
-# You need the trailing / else the logs dir won't be created
 build_path: "mnt/lfs/"
 
 # path to recipes dir
@@ -51,52 +30,6 @@ recipes_path: "dkrecipes/"
 
 # only build the base system phase 1-4
 bootstrap_only: false
-
-
-
-
-# These options are passed into fdisk to create a basic BIOS layout
-# blank lines will cause fdisk to use the default option
-fdisk: |
-  o       # create DOS partition table
-  n       # new partition
-          # default partition type (primary)
-          # default partition number (1)
-          # default partition start
-          # default partition end (max)
-  y       # confirm overwrite (noop if not prompted)
-  w       # write to device and quit
-
-
-#if uefi: true
-fdisk_uefi: |
- g       # create GPT partition table
- n       # new partition (BIOS boot)
- 1       # partition number
-        # default start
- +2M     # 2MB for BIOS boot
- t       # change type
- #1       # partition 1
- 4       # type 4 = BIOS boot (EF02)
- n       # new partition (EFI system)
- 2
-         # default start
- +500M
- t
- 2
- 1       # type 1 = EFI System (EF00)
- n       # new partition (swap)
- 3
-         # default start
- +4G
- t
- 3
- 19      # type 19 = Linux swap
- n       # new partition (LFS root)
- 4
-         # default start
-         # default end (use rest of disk)
- w       # write table and exit
 
 version_check: |
   #!/bin/bash
