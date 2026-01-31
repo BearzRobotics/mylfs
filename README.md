@@ -342,15 +342,14 @@ in builder.py you'll find these set
 [] - libyaml
 [] - libcurl
 
-
-
 # runtime deps
 [] - Rsync
 [] - tar
 [] - unzip
 [] - gnu make
 [] - autotools
-[] - zig
+[] - zig (default make file uses zig cc as c compiler)
+[] - qemu
 
 # Things I hate about C!
    * glibc is a nightmare to program with. With access unix features only working

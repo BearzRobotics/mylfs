@@ -1,5 +1,14 @@
-CC      := zig cc #clang # musl-clang
-CFLAGS  := -std=c99 -Wall -Wextra -Wpedantic -Wempty-translation-unit -O2 -g 
+# Use zig as my build compiler. If you want to use it everywhere export it.
+CC=zig cc
+CXX=zig c++
+AR=zig ar
+RANLIB=zig ranlib
+OBJCOPY=zig objcopy
+RC=zig rc
+LIB=zig lib
+
+
+FLAGS  := -std=c99 -Wall -Wextra -Wpedantic -Wempty-translation-unit -O2 -g 
 LDFLAGS := -static -lyaml
 INCLUDES:= -Iinclude
 
