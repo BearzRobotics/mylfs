@@ -39,7 +39,7 @@
                 Prints a basic help menu for mylfs
 
         --test
-                Enable a $RUN_TESTS variable inside the chroot enviroment for
+                Enable a $RUN_TEST variable inside the chroot enviroment for
                 build scripts that support it to run their test. Otherwise test 
                 are skipped.
         

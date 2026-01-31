@@ -18,11 +18,9 @@ cleanup_sources: true
 # keep log files
 keep_logs: true
 
-# build path is a relative path to the execution of the program.
-# If your desired install drive is big enough it's not a bad idea
-# to mount it to the default location and build it in place.
-# default is "mnt/lfs/"
-build_path: "mnt/lfs/"
+# This build path is relative to the executable. However, mylfs 
+# will resolve it to it's absoulte path
+build_path: "mnt/lfs"
 
 # path to recipes dir
 # default is recipes_path: "recipes/"

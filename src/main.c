@@ -165,7 +165,7 @@ int loadConfig(Config *cfg, const char *cfpath){
         }
 
         // cfg.debug won't work here because of where it's called            
-        print_yaml_event(&event);
+        //print_yaml_event(&event);
       
         if (event.type == YAML_SCALAR_EVENT) {
             char *value = (char *)event.data.scalar.value;
@@ -183,9 +183,9 @@ int loadConfig(Config *cfg, const char *cfpath){
                 } else if (strcmp(current_key, "keep_logs") == 0) {
                     cfg->keepLogs = parse_bool(value);
                 } else if (strcmp(current_key, "build_path") == 0) {
-                    cfg->buildPath = strdup(value);
+                    cfg->buildPath = strdup(realpath(value, NULL));
                 } else if (strcmp(current_key, "recipes_path") == 0) {
-                    cfg->recipesPath = strdup(value);
+                    cfg->recipesPath = strdup(realpath(value, NULL));
                 } else if (strcmp(current_key, "bootstrap_only") == 0) {
                     cfg->bootstrap = parse_bool(value);
                 } else if (strcmp(current_key, "version_check") == 0) {
@@ -401,7 +401,7 @@ int main(int argc, char* argv[]) {
 
 
     if (cfg.debug) {
-        printf("[debug] cfg.versionCheck: %s\n", cfg.versionCheck);
+        printf("[Debug] cfg.versionCheck: %s\n", cfg.versionCheck);
     }
 
 
@@ -415,7 +415,7 @@ int main(int argc, char* argv[]) {
     // check if builderDir is empty 
     //      If it isn't ask if they want to delete it
     if (isDirEmpty(cfg, cfg.buildPath)) {
-        warn("Build dir is not empty. Do you want to delete the contents y/n\n");
+        warn("Build dir is not empty. Do you want to delete the contents y/n: ");
         int input;
         input = getchar(); 
         if (input == 'y')  {

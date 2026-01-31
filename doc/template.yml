@@ -1,0 +1,16 @@
+name:
+version:
+release:
+url:
+homepage:
+
+license:
+summary:
+description: |
+
+phase:               
+order:                  # phase 1-4 only
+critical: true
+builddeps:     []       # if need
+
+buildsteps: |
