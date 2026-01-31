@@ -12,6 +12,7 @@
 #include <sys/mount.h>
 #include <sys/wait.h>
 #include <limits.h>
+#include <dirent.h>
 
 #include <yaml.h>
 
@@ -133,11 +134,11 @@ static bool parse_bool(const char *v) {
     return strcmp(v, "true") == 0 || strcmp(v, "yes") == 0 || strcmp(v, "1") == 0;
 }
 
-int loadConfig(Config cfg, const char *cfpath){
-    
+// without the pointer (*) I only get a copy of the Config struct
+// not the actually config Struct
+int loadConfig(Config *cfg, const char *cfpath){
     // cfg.debug won't work here because of where it's called  
     // printf("[debug] loadConfig() cfpath: %s", cfpath);
-
 
     FILE *fh = fopen(cfpath, "r");
     if (!fh) {
@@ -164,9 +165,8 @@ int loadConfig(Config cfg, const char *cfpath){
         }
 
         // cfg.debug won't work here because of where it's called            
-        // print_yaml_event(&event);
+        print_yaml_event(&event);
       
-
         if (event.type == YAML_SCALAR_EVENT) {
             char *value = (char *)event.data.scalar.value;
 
@@ -175,21 +175,21 @@ int loadConfig(Config cfg, const char *cfpath){
             } else {
                 // This scalar is a VALUE
                 if (strcmp(current_key, "lfs_tgt") == 0) {
-                    cfg.lfs_tgt = strdup(value);
+                    cfg->lfs_tgt = strdup(value);
                 } else if (strcmp(current_key, "test") == 0) {
-                    cfg.test = parse_bool(value);
+                    cfg->test = parse_bool(value);
                 } else if (strcmp(current_key, "cleanup_sources") == 0) {
-                    cfg.cleanup_src = parse_bool(value);
+                    cfg->cleanup_src = parse_bool(value);
                 } else if (strcmp(current_key, "keep_logs") == 0) {
-                    cfg.keepLogs = parse_bool(value);
+                    cfg->keepLogs = parse_bool(value);
                 } else if (strcmp(current_key, "build_path") == 0) {
-                    cfg.buildPath = strdup(value);
+                    cfg->buildPath = strdup(value);
                 } else if (strcmp(current_key, "recipes_path") == 0) {
-                    cfg.recipesPath = strdup(value);
+                    cfg->recipesPath = strdup(value);
                 } else if (strcmp(current_key, "bootstrap_only") == 0) {
-                    cfg.bootstrap = parse_bool(value);
+                    cfg->bootstrap = parse_bool(value);
                 } else if (strcmp(current_key, "version_check") == 0) {
-                    cfg.versionCheck = strdup(value);
+                    cfg->versionCheck = strdup(value);
                 }
 
                 free(current_key);
@@ -242,7 +242,7 @@ bool versionCheck(Config cfg) {
     }
 
     int status;
-    waitp(&status);
+    wait(&status);
 
     if (status == 0) {
         return true;
@@ -252,14 +252,58 @@ bool versionCheck(Config cfg) {
 
 }
 
+bool isDirEmpty(Config cfg, const char *path){
+    if (cfg.debug) {
+        printf("[debug] isDirEmpty Path: %s\n", path);
+    }
+
+    DIR *dir = opendir(path);
+    if (!dir) {
+        perror("opendir");
+        return false;
+    }
+
+    // I need a dirent sturct to read the contents of my opendir
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0|| strcmp(entry->d_name, "..") == 0)  {
+            continue;
+        }
+
+        if (cfg.debug) {
+            printf("[debug] isDirEmpty File contents: %s\n", entry->d_name);
+        }
+
+        closedir(dir);
+        return false; // found something
+    }
+
+    closedir(dir);
+    return true;
+}
+
+bool deleteDirContents(Config cfg, const char *path){
+    if (cfg.debug) {
+        printf("[debug] deleteDirContents Path: %s\n", path);
+    }
+
+    DIR *dir = opendir(path);
+    if (!dir) {
+        perror("opendir");
+        return false;
+    }
+
+    // I need a dirent sturct to read the contents of my opendir
+    struct dirent *entry;
+  
+
+    closedir(dir);
+    return true;
+}
 
 int main(int argc, char* argv[]) {
-
-    /*
-    // I don't remember why I needed root privalges for mylfs-py -- Duh chroot
-    */
     if (getuid() != 0) {
-        failed("mylfs requires root privalges! Run at your own peril\n");
+        failed("mylfs requires root privalges! {chroot, bind mount, umount} Run at your own peril\n");
         exit(1);
     }
 
@@ -270,7 +314,7 @@ int main(int argc, char* argv[]) {
 
     //load our yaml config. By loading it here it will allow our command line options to 
     // override it.
-    loadConfig(cfg, "./config.yml");
+    loadConfig(&cfg, "./config.yml");
 
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--debug") == 0) {
@@ -360,15 +404,26 @@ int main(int argc, char* argv[]) {
         printf("[debug] cfg.versionCheck: %s\n", cfg.versionCheck);
     }
 
+
     if (versionCheck(cfg) == false) {
         failed("System does not meet the required build deps\n");
         exit(1);
     }
+    
 
     // need to check for required tools
     // check if builderDir is empty 
     //      If it isn't ask if they want to delete it
-    // mount bind dirs - I also need to umount bind dirs
+    if (isDirEmpty(cfg, cfg.buildPath)) {
+        warn("Build dir is not empty. Do you want to delete the contents y/n\n");
+        int input;
+        input = getchar(); 
+        if (input == 'y')  {
+            deleteDirContents(cfg, cfg.buildPath);
+        }
+    }
+
+
     // initalize recipes 
     //      Download packages
     // Copies recipes over

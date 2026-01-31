@@ -48,6 +48,17 @@ void skip(const char *mesg) {
     }
 }
 
+
+
+void warn(const char *mesg) {
+    const char *nocolor = getenv("NO_COLOR");
+    if (nocolor != NULL) {
+        printf("    [warn]    %s\n", mesg);
+    } else {
+        printf("%s    [warn]%s    %s\n", yellow, reset, mesg);
+    }
+}
+
 void header(const char *mesg) {
     const char *nocolor = getenv("NO_COLOR");
     if (nocolor != NULL) {
