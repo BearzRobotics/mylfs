@@ -3,33 +3,22 @@
 #define _POSIX_SOURCE
 #define _GNU_SOURCE // Chroot fails to compile without this  - Hopefully this won't create an issue with musl!
 
-#include <stdio.h>
+#include <stdio.h> // remove rmdir unlink
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h>
+#include <unistd.h> //getuid
 #include <errno.h>
-#include <sys/mount.h>
-#include <sys/wait.h>
 #include <limits.h>
-#include <dirent.h>
 
 #include <yaml.h>
 
 #include "config.h"
 #include "dprint.h"
-
-
+#include "phase.h"
+#include "fs.h"
 
 // mounts is an array that holds these paths
-const char *mounts[] = {
-    "/dev",
-    "/dev/pts",
-    "/proc",
-    "/sys",
-    "/run",
-};
-
 
 void help(void) {
 const char* help_mesg =
@@ -48,64 +37,11 @@ const char* help_mesg =
     "Author: Dakota James Owen Keeler\n"
     "Email: DakotaJKeeler@protonmail.com\n";
 
-
     printf("%s", help_mesg);
 }
 
-
 void version(void) {
     printf("0.0.6\n");
-}
-
-// bind mount /dev /dev/pts /proc /sys /run
-bool mountBind(Config cfg, char *cpath) {
-    //man 2 mount
-
-    // We need to get the size of our mounts array
-    size_t count = sizeof(mounts) / sizeof(mounts[0]);
-
-    for (size_t i = 0; i < count; i++) {
-        char target[PATH_MAX]; // limits.h
-
-        snprintf(target, sizeof(target), "%s%s", cpath, mounts[i]);
-
-        if (mount(mounts[i], target, NULL, MS_BIND, NULL) != 0) {
-            perror("mount");
-            failed("Could not bind mount needed filesystems\n");
-            return false;
-        } else {
-            if (cfg.debug == true) {
-                printf("Bind Mounted: %s -> %s\n", mounts[i], target);
-            }
-        }
-    }
-    return true;
-}
-
-// unbind mount /dev /dev/pts /proc /sys /run
-bool unmountBind(Config cfg, char *cpath) {
-    //man 2 umount
-
-    // We need to get the size of our mounts array
-    size_t count = sizeof(mounts) / sizeof(mounts[0]);
-
-    // needs to be in reverse order
-    for (size_t i = count; i-- > 0;) {
-        char target[PATH_MAX]; // limits.h
-
-        snprintf(target, sizeof(target), "%s%s", cpath, mounts[i]);
-
-        if (umount2(target, MNT_DETACH) != 0) {
-            perror("umount2");
-            printf("umounted: %s\n", target);
-            return false;
-        }  else {
-            if (cfg.debug == true) {
-                printf("umounted: %s\n", target);
-            }
-        }
-    }
-    return true;
 }
 
 
@@ -128,7 +64,6 @@ void print_yaml_event(yaml_event_t *event) {
             break;
     }
 }
-
 
 static bool parse_bool(const char *v) {
     return strcmp(v, "true") == 0 || strcmp(v, "yes") == 0 || strcmp(v, "1") == 0;
@@ -190,6 +125,14 @@ int loadConfig(Config *cfg, const char *cfpath){
                     cfg->bootstrap = parse_bool(value);
                 } else if (strcmp(current_key, "version_check") == 0) {
                     cfg->versionCheck = strdup(value);
+                } else if (strcmp(current_key, "make_flags") == 0) {
+                    cfg->makeFlags = strdup(value);
+                } else if (strcmp(current_key, "cflags") == 0) {
+                    cfg->CFLAGS = strdup(value);
+                } else if (strcmp(current_key, "cxxflags") == 0) {
+                    cfg->CXXFLAGS = strdup(value);
+                } else if (strcmp(current_key, "RUSTFLAGS") == 0) {
+                    cfg->RUSTFLAGS = strdup(value);
                 }
 
                 free(current_key);
@@ -216,8 +159,16 @@ int loadConfig(Config *cfg, const char *cfpath){
     return -1;
 }
 
-
 bool versionCheck(Config cfg) {
+    // Create a pipe before forking
+    int pipefd[2]; 
+    // pipefd[0] = read end (parent)
+    // pipefd[1] = write end (child)
+    if (pipe(pipefd) == -1) {
+        perror("pipe");
+        return false;
+    }
+    
     pid_t pid = fork();
     if (pid <0) {
         perror("fork");
@@ -225,6 +176,12 @@ bool versionCheck(Config cfg) {
     }
 
     if (pid == 0) {
+        close(pipefd[0]); // child doesn't read 
+
+        dup2(pipefd[1], STDOUT_FILENO);
+        dup2(pipefd[1], STDERR_FILENO);
+        close(pipefd[1]);
+
         char *argv[] = {
             "bash",
             "-c",
@@ -244,61 +201,40 @@ bool versionCheck(Config cfg) {
     int status;
     wait(&status);
 
+    // stole this from chatGPT
+    close(pipefd[1]); // parent doesn't write
+
+    char buffer[4096];
+    size_t total = 0;
+    char *output = NULL;
+
+    ssize_t n;
+    while ((n = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
+        char *tmp = realloc(output, total + n + 1);
+        if (!tmp) {
+            perror("realloc");
+            free(output);
+            break;
+        }
+        output = tmp;
+        memcpy(output + total, buffer, n);
+        total += n;
+        output[total] = '\0';
+    }
+
+    close(pipefd[0]);
+
+    // back
     if (status == 0) {
+        if (cfg.debug) {
+            printf("%s", output);
+        } 
         return true;
     } else {
+        printf("%s", output);
         return false;
     }
 
-}
-
-bool isDirEmpty(Config cfg, const char *path){
-    if (cfg.debug) {
-        printf("[debug] isDirEmpty Path: %s\n", path);
-    }
-
-    DIR *dir = opendir(path);
-    if (!dir) {
-        perror("opendir");
-        return false;
-    }
-
-    // I need a dirent sturct to read the contents of my opendir
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0|| strcmp(entry->d_name, "..") == 0)  {
-            continue;
-        }
-
-        if (cfg.debug) {
-            printf("[debug] isDirEmpty File contents: %s\n", entry->d_name);
-        }
-
-        closedir(dir);
-        return false; // found something
-    }
-
-    closedir(dir);
-    return true;
-}
-
-bool deleteDirContents(Config cfg, const char *path){
-    if (cfg.debug) {
-        printf("[debug] deleteDirContents Path: %s\n", path);
-    }
-
-    DIR *dir = opendir(path);
-    if (!dir) {
-        perror("opendir");
-        return false;
-    }
-
-    // I need a dirent sturct to read the contents of my opendir
-    struct dirent *entry;
-  
-
-    closedir(dir);
-    return true;
 }
 
 int main(int argc, char* argv[]) {
@@ -399,22 +335,17 @@ int main(int argc, char* argv[]) {
         printf("[Debug] Mode has been enabled!\n");
     }
 
-
-    if (cfg.debug) {
-        printf("[Debug] cfg.versionCheck: %s\n", cfg.versionCheck);
-    }
-
-
     if (versionCheck(cfg) == false) {
         failed("System does not meet the required build deps\n");
         exit(1);
+    } else {
+        passed("Your system meets the mininum requirments!\n");
     }
-    
 
     // need to check for required tools
     // check if builderDir is empty 
     //      If it isn't ask if they want to delete it
-    if (isDirEmpty(cfg, cfg.buildPath)) {
+    if (isDirEmpty(cfg, cfg.buildPath) == false) {
         warn("Build dir is not empty. Do you want to delete the contents y/n: ");
         int input;
         input = getchar(); 
@@ -423,38 +354,35 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
     // initalize recipes 
     //      Download packages
     // Copies recipes over
     // Create lfs user and group
     // chown buildDir to lfs user and group
 
-    if (cfg.phase == 0) {
+    if (cfg.phase == CROSS_TOOLS) {
         header("Phase 1 - Cross Tools");
         cfg.phase += 1;
     }
 
-    if (cfg.phase == 1) {
+    if (cfg.phase == TEMP_TOOLS) {
         header("Phase 2 - Temp Tools");
         cfg.phase += 1;
     }
 
-    if (cfg.phase == 2) {
+    if (cfg.phase == TEMP_SYSTEM) {
         header("Phase 3 - Temp system");
         cfg.phase += 1;
     }
 
-    if (cfg.phase == 3) {
+    if (cfg.phase == LFS_BASE) {
         header("Phase 4 - LFS Base System");
         cfg.phase += 1;
     }
 
-    if (cfg.phase == 4 && cfg.bootstrap == false) {
+    if (cfg.phase == EXTRA_PACKAGES && cfg.bootstrap == false) {
         header("Phase 5 - Building extra packages per the recipes!");
     }
 
     return 0;
 }
-
-

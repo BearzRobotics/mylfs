@@ -11,17 +11,28 @@
 #include <errno.h>
 #include <pwd.h>
 
-
 #include "config.h"
 #include "dprint.h"
+#include "recipe.h"
 
-int builder(Config cfg) {
+bool extractTarball() {
+
+}
+
+// load phase.yaml and grab it
+short getPhase(Config cfg) {}
+
+// Updates the phase number in the phase.yaml
+bool setPhase(Config cfg) {}
+
+// deletes dir
+bool cleanup(Config cfg) {}
+
+bool builderBootstrap(Config cfg) {
+
     if (cfg.debug) {
         printf("[debug] Entered the builder phase\n");
     }
-
-
-
 
             if (chroot(cfg.buildPath) != 0) {
                 perror("chroot to chrootPath Failed!\n");
@@ -45,3 +56,6 @@ int builder(Config cfg) {
             exit(0);
 
 } 
+
+
+bool builderPhase5(Config cfg) {}

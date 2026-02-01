@@ -2,10 +2,11 @@
 #define MYLFS_CONFIG_H
 
 #include <stdbool.h>
+#include "phase.h"
 
 typedef struct {
     bool debug;
-    short phase;
+    BuildPhase phase;
     char *packName;
     bool test;
     bool cleanup_src;
@@ -15,6 +16,10 @@ typedef struct {
     char *recipesPath;
     bool bootstrap;
     char *versionCheck;
+    char *makeFlags;
+    char *CFLAGS;
+    char *CXXFLAGS;
+    char *RUSTFLAGS;
 } Config;
 
 /* Declare the global config variable */

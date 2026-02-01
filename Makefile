@@ -7,7 +7,6 @@ OBJCOPY=zig objcopy
 RC=zig rc
 LIB=zig lib
 
-
 FLAGS  := -std=c99 -Wall -Wextra -Wpedantic -Wempty-translation-unit -O2 -g 
 LDFLAGS := -static -lyaml
 INCLUDES:= -Iinclude

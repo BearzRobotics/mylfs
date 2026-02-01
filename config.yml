@@ -29,6 +29,19 @@ recipes_path: "dkrecipes/"
 # only build the base system phase 1-4
 bootstrap_only: false
 
+# If you want to pass a global custom param for make you pass it here
+make_flags: " "
+
+# If you want to pass global CFLAGS
+cflags: " "
+
+# if you want to pass global CXXFLAGS
+cxxflags: " "
+
+# If you want to pass global rust flangs Note while this will be passed 
+# as an ENV you must create recipes to build the rust compiler. 
+RUSTFLAGS: ""
+
 version_check: |
   #!/bin/bash
   # This script came from LFS 12.3

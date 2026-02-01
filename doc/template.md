@@ -79,12 +79,20 @@ cleanup: false   # Optional - Tells the build system to not delete the extract
 
 $var            In the shell script section all vars must be defined with a 
                 few exceptions:
-                   $RUN_TEST
                    $LFS
-                   $LFS_TGT                  
-                These values are auto populated. Though $RUN_TESTS is only
-                populated if --test is passed or if test: false is set to true
-                in the config.yml.
+                   $LFS_TGT
+                 
+                The above values are auto populated. 
+
+                   $RUN_TEST
+                   $MAKEFLAGS
+                   $CFLAGS
+                   $CXXFLAGS
+                   $RUSTFLAGS 
+
+                These values by default are left blank config.yml and can be 
+                configured there. $RUN_TESTS is also be configure when --test 
+                is passed as well as the config.yml
 
                 To use $RUN_TEST variable add this to your buildsteps:
 
@@ -93,6 +101,8 @@ $var            In the shell script section all vars must be defined with a
                     make check # Or any other test command as desired. 
                     set -e
                 fi
+
+                
 
 
 eg template.yml

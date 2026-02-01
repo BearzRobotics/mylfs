@@ -14,9 +14,9 @@ void passed(const char *mesg) {
     const char *nocolor = getenv("NO_COLOR");
     
     if (nocolor != NULL) {
-        printf("Passed]    %s\n", mesg);
+        printf("    [Passed]    %s\n", mesg);
     } else {
-        printf("%s[Passed]%s    %s\n", green, reset, mesg);
+        printf("%s  [Passed]%s    %s\n", green, reset, mesg);
     }
     
 }
@@ -33,9 +33,9 @@ void built(int count, const char *mesg) {
 void failed(const char *mesg) {
     const char *nocolor = getenv("NO_COLOR");
     if (nocolor != NULL) {
-        printf("[Failed]    %s\n", mesg);
+        printf("    [Failed]    %s\n", mesg);
     } else {
-        printf("%s[Failed]%s    %s\n", red, reset, mesg);
+        printf("%s  [Failed]%s    %s\n", red, reset, mesg);
     }
 }
 
