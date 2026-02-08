@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <dirent.h> 
 #include <ftw.h>
+#include <errno.h>
 #include <sys/stat.h> // mkdir
 
 #include "config.h"
@@ -26,6 +27,44 @@ const char *mounts[] = {
 // DJOK
 // Need to check if bindmounts are already mounted. If so skip it
 
+bool isMounted(char *cpath) {
+    FILE *fh = fopen("/proc/self/mountinfo", "re");
+    if (!fh) {
+        perror("fopen");
+        return false;
+    }
+
+    char line[4096];
+    bool found = false;
+
+    while(fgets(line, sizeof line, fh)) {
+        // mountinfo format:
+        // id parent major:minor root mount_point options ... - fstype source superopts
+        // We want the 5th field: mount_point
+        //
+        // Fields are space-separated, but mount_point may contain escaped spaces as \040
+        // (same for root).
+        char *save = NULL;
+        char *tok = strtok_r(line, " ", &save); // 1: id
+        if (!tok) continue;
+        tok = strtok_r(NULL, " ", &save);       // 2: parent
+        tok = strtok_r(NULL, " ", &save);       // 3: major:minor
+        tok = strtok_r(NULL, " ", &save);       // 4: root
+        tok = strtok_r(NULL, " ", &save);       // 5: mount_point
+        if (!tok) continue;
+
+        // tok is the mount_point, possibly with escapes like \040 for space.
+        if (strcmp(tok, cpath) == 0) {
+            found = true;
+            break;
+        }
+    }
+
+    fclose(fh);
+    return found;
+}
+
+
 // bind mount /dev /dev/pts /proc /sys /run
 bool mountBind(Config cfg, char *cpath) {
     //man 2 mount
@@ -38,14 +77,20 @@ bool mountBind(Config cfg, char *cpath) {
 
         snprintf(target, sizeof(target), "%s%s", cpath, mounts[i]);
 
-        if (mount(mounts[i], target, NULL, MS_BIND, NULL) != 0) {
-            perror("mount");
-            failed("Could not bind mount needed filesystems\n");
-            return false;
-        } else {
-            if (cfg.debug == true) {
-                printf("Bind Mounted: %s -> %s\n", mounts[i], target);
+        if (!isMounted(target)) {
+            if (mount(mounts[i], target, NULL, MS_BIND, NULL) != 0) {
+                perror("mount");
+                failed("Could not bind mount needed filesystems\n");
+                return false;
+            } else {
+                if (cfg.debug == true) {
+                    printf("Bind Mounted: %s -> %s\n", mounts[i], target);
+                }
             }
+        } else {
+            char buf[1024];
+            snprintf(buf, sizeof buf, "Already mounted: %s", target);
+            skip(buf);
         }
     }
     return true;

@@ -297,12 +297,12 @@ int main(int argc, char* argv[]) {
                 // man exec(3) -- _GNU_SOURCE
 
                 char *sh_argv[] = {
-                    "sh",
+                    "bash",
                     "--login",
                     NULL
                 };
 
-                if (execve("/bin/sh", sh_argv, environ) != 0) {
+                if (execve("/bin/bash", sh_argv, environ) != 0) {
                     perror("execve\n");
                     _exit(1);
                 }
