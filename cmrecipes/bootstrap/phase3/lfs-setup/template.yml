@@ -1,0 +1,62 @@
+name: lfs-setup
+version: 0.0.0
+release: 1
+
+license: GPL-2.0-only
+summary: used to create basic LFS file system layout
+
+phase: 3
+order: 1
+critical: true
+
+buildsteps: |
+  # fix musl 
+  # Clang
+  ############################################
+  sed -i \
+  -e 's|^libc_lib=".*"|libc_lib="/usr/lib"|' \
+  -e 's|^ldso=".*"|ldso="/lib/ld-musl-x86_64.so.1"|' \
+  /bin/ld.musl-clang
+
+  sed -i \
+  -e 's|^libc=".*"|libc="/usr"|' \
+  -e 's|^libc_inc=".*"|libc_inc="/usr/include"|' \
+  -e 's|^libc_lib=".*"|libc_lib="/usr/lib"|' \
+  /bin/musl-clang
+
+
+  # /etc and /root in static were created with 
+  # tar -czvf static_files.tar.gz etc/ root/
+  tar -xf static_files.tar.gz -C /
+  # need to give root ownership
+  chown -R root:root $LFS/{usr,lib,var,etc,bin,sbin,tools}
+  case $(uname -m) in
+    x86_64) chown -R root:root $LFS/lib64 ;;
+  esac
+
+  ln -sfv /run /var/run
+  ln -sfv /run/lock /var/lock
+
+  install -d -m 0750 /root
+  install -d -m 1777 /tmp /var/tmp
+
+  # in no particular part of the book, but still needed
+  mkdir -p /boot/grub
+  mkdir -p /etc/{modprobe.d,ld.so.conf.d}
+
+  ln -svf /proc/self/mounts /etc/mtab
+  
+  # tester is already in my static shadow file
+  echo "creating test user for later in the book. Will be cleaned up at end of phase 4"
+  install -o tester -d /home/tester
+
+
+  chmod +x /etc/init.d/hostname
+  touch /etc/hostname
+  
+  touch /var/log/{btmp,lastlog,faillog,wtmp}
+  chgrp -v utmp /var/log/lastlog
+  chmod -v 664 /var/log/lastlog
+  chmod -v 600 /var/log/btmp
+
+  

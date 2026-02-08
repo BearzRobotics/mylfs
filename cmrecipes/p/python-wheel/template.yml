@@ -1,0 +1,18 @@
+name: python-wheel
+version: 0.45.1
+release: 1
+url: https://pypi.org/packages/source/w/wheel/wheel-0.45.1.tar.gz
+homepage: https://pypi.org/project/wheel/
+
+license: MIT
+summary: Wheel is a Python library that is the reference implementation of the Python wheel packaging standard.
+description: |
+  Wheel is a Python library that is the reference implementation of the Python wheel packaging standard.
+phase: 4
+order: 265
+critical: true
+
+buildsteps: |
+  pip3 wheel -w dist --no-cache-dir --no-build-isolation --no-deps $PWD
+
+  pip3 install --no-index --find-links=dist wheel

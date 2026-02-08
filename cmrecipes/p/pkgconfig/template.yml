@@ -1,0 +1,32 @@
+name: pkgconfig
+version: 2.3.0
+release: 1
+url: https://distfiles.ariadne.space/pkgconf/pkgconf-2.3.0.tar.xz
+homepage: https://github.com/pkgconf/pkgconf
+
+license: ISC
+summary: Package compiler and linker metadata toolkit
+description: |
+  Package compiler and linker metadata toolkit
+  
+phase: 4
+order: 85
+critical: true
+
+buildsteps: |
+  ./configure --prefix=/usr              \
+              --disable-static           \
+              --docdir=/usr/share/doc/pkgconf-{version}
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+
+  ln -vfs pkgconf   /usr/bin/pkg-config
+  ln -vfs pkgconf.1 /usr/share/man/man1/pkg-config.1

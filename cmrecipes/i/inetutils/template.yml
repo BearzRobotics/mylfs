@@ -1,0 +1,40 @@
+name: inetutils
+version: 2.6
+release: 1
+url: https://ftp.gnu.org/gnu/inetutils/inetutils-2.6.tar.xz
+homepage: https://www.gnu.org/software/inetutils/
+
+license: GPL-3.0-or-later
+summary: A collection of common network programs
+description: |
+  A collection of common network programs
+
+phase: 4
+order: 195
+critical: true
+builddeps: [ readline ]
+
+buildsteps: |
+  sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c
+
+  ./configure --prefix=/usr        \
+              --bindir=/usr/bin    \
+              --localstatedir=/var \
+              --disable-logger     \
+              --disable-whois      \
+              --disable-rcp        \
+              --disable-rexec      \
+              --disable-rlogin     \
+              --disable-rsh        \
+              --disable-servers
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+
+  mv /usr/{,s}bin/ifconfig

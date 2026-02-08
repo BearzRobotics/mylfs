@@ -1,0 +1,35 @@
+name: bzip2
+version: 1.0.8
+release: 1
+url: https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
+homepage: https://sourceware.org/bzip2/
+
+license: Modified zlib license
+summary: Bzip2 a much better bzip
+description: | 
+  contains programs for compressing and decompressing files. Compressing text files with bzip2 yields a much better compression percentage than with the traditional gzip.
+
+phase: 4
+order: 20
+critical: true
+
+#builddeps: [make, glibc]
+
+buildsteps: |
+  patch -Np1 -i ../patches/bzip2-1.0.8-install_docs-1.patch
+
+  sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+  sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+
+  make -f Makefile-libbz2_so
+  make clean
+  make
+  make PREFIX=/usr install
+
+  cp -a libbz2.so.* /usr/lib
+  ln -vfs libbz2.so.{version} /usr/lib/libbz2.so
+  cp bzip2-shared /usr/bin/bzip2
+  for i in /usr/bin/{bzcat,bunzip2}; do
+    ln -sfv bzip2 $i
+  done
+  rm -f /usr/lib/libbz2.a

@@ -1,0 +1,23 @@
+name: lfs-bootscripts
+version: 20240825
+release: 1
+url: https://www.linuxfromscratch.org/lfs/downloads/12.3/lfs-bootscripts-20240825.tar.xz
+homepage: https://www.linuxfromscratch.org/
+
+license:  Public-Domain
+summary: Scripts from LFS 12.3 to allow the system to boot
+description: |
+  Scripts from LFS 12.3 for SysVInit to allow the system to boot
+phase: 4
+order: 440
+critical: true
+
+buildsteps: |
+  set +e
+  sed -i 's/ln -sf/ln -sfv/g' Makefile
+  make install
+
+  # generate network interface name rules
+  # Only run init-net-rules.sh if the rules file doesn't exist
+  [ ! -f /etc/udev/rules.d/70-persistent-net.rules ]
+    bash /usr/lib/udev/init-net-rules.sh || true

@@ -209,7 +209,7 @@ def buildPhase12(config: GlobalConfig, recipes: List[Recipe]):
         "LFS": str(Path(config.build_path).resolve()),
         "LC_ALL": "POSIX",
         "LFS_TGT": str(config.lfs_tgt),
-        "PATH": f"{Path(config.build_path).resolve()}/tools/bin:/usr/bin",
+        "PATH": f"{Path(config.build_path).resolve()}/tools/bin:/usr/bin:/bin:/sbin:/usr/sbin",
         "CONFIG_SITE": f"{Path(config.build_path).resolve()}/usr/share/config.site",
         "MAKEFLAGS": str(config.make_flags),
         "RUN_TESTS": "1" if config.run_test else "0",
@@ -344,7 +344,7 @@ def buildPhase34(config: GlobalConfig, recipes: List[Recipe]):
             "HOME=/root",
             "TERM=xterm",
             "PS1=\\u:\\w\\$ ",
-            "PATH=/usr/bin:/usr/sbin",
+            "PATH=/usr/bin:/usr/sbin:/bin:/sbin",
             "bash", "--login"
             ],
             env=env,

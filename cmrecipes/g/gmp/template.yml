@@ -1,0 +1,43 @@
+name: gmp
+version: 6.3.0
+release: 1
+url: https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
+homepage: https://www.gnu.org/software/gmp/
+
+license: 
+  - GPL-2.0-or-later
+  - LGPL-3.0-or-later
+summary: The GMP package contains math libraries. These have useful functions for arbitrary precision arithmetic.
+description: |
+  The GMP package contains math libraries. These have useful functions for arbitrary precision arithmetic.
+
+phase: 4
+order: 95
+critical: true
+
+builddeps: [make, glibc]
+
+buildsteps: |
+  ./configure --prefix=/usr    \
+              --enable-cxx     \
+              --disable-static \
+              --docdir=/usr/share/doc/gmp-{version}
+
+  make
+  make html
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check 
+      set -e
+  fi
+
+  #PASS_COUNT=$(awk '/# PASS:/{total+=$3} ; END{print total}' $TESTLOG_DIR/gmp.log)
+  #if [ "$PASS_COUNT" != "" ];
+  #then
+  #    echo "ERROR: GMP tests failed. Check /sources/stage6/gmp_test.log for more info."
+  #    exit -1
+  #fi
+
+  make install
+  make install-html

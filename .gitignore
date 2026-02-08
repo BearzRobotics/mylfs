@@ -6,6 +6,10 @@ mnt/install/*
 mnt/lfs/*
 !mnt/lfs/.gitkeep
 
+mnt/blfs
+mnt/olfs
+
+
 !res/logs
 !res/logs2
 
@@ -22,6 +26,8 @@ recipes/**/*.tar.bz2
 recipes/**/*.tgz
 recipes/**/*.zip
 
+
+
 # EXCEPTION: keep static_files.tar.gz in lfs-setup
 !recipes/bootstrap/phase3/lfs-setup/static/static_files.tar.gz
 !dkrecipes/q/qbasic/pds71.zip
@@ -35,6 +41,20 @@ dkrecipes/**/*.zip
 
 # EXCEPTION: keep static_files.tar.gz in lfs-setup
 !dkrecipes/bootstrap/phase3/lfs-setup/static/static_files.tar.gz
+
+
+# Ignore downloaded archives inside any recipe subfolder
+cmrecipes/**/*.tar.gz
+cmrecipes/**/*.tar.xz
+cmrecipes/**/*.tar.zst
+cmrecipes/**/*.tar.bz2
+cmrecipes/**/*.tgz
+cmrecipes/**/*.zip
+
+
+
+# EXCEPTION: keep static_files.tar.gz in lfs-setup
+!cmrecipes/bootstrap/phase3/lfs-setup/static/static_files.tar.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

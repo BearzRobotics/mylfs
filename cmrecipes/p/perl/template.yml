@@ -1,0 +1,49 @@
+name: perl
+version: 5.40.1
+release: 1
+url: https://www.cpan.org/src/5.0/perl-5.40.1.tar.xz
+homepage: https://www.perl.org/
+
+license: 
+    - Artistic-1.0-Perl
+    - GPL-2.0-or-later
+    - GPL-1.0-or-later
+    - MIT
+summary: Perl
+description: |
+  An interpreted scripting language, known among some as "Unix's Swiss Army Chainsaw".
+
+phase: 4
+order: 205
+critical: true
+builddeps: [ gdbm ]
+
+buildsteps: |
+  export BUILD_ZLIB=False
+  export BUILD_BZIP2=0
+
+  sh Configure -des                                          \
+              -D prefix=/usr                                \
+              -D vendorprefix=/usr                          \
+              -D privlib=/usr/lib/perl5/5.40/core_perl      \
+              -D archlib=/usr/lib/perl5/5.40/core_perl      \
+              -D sitelib=/usr/lib/perl5/5.40/site_perl      \
+              -D sitearch=/usr/lib/perl5/5.40/site_perl     \
+              -D vendorlib=/usr/lib/perl5/5.40/vendor_perl  \
+              -D vendorarch=/usr/lib/perl5/5.40/vendor_perl \
+              -D man1dir=/usr/share/man/man1                \
+              -D man3dir=/usr/share/man/man3                \
+              -D pager="/usr/bin/less -isR"                 \
+              -D useshrplib                                 \
+              -D usethreads
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      TEST_JOBS=$(nproc) make test_harness
+      set -e
+  fi
+
+  make install
+  unset BUILD_ZLIB BUILD_BZIP2

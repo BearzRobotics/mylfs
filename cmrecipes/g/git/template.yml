@@ -1,0 +1,29 @@
+name: git
+version: 2.49.0
+release: 1
+url: 
+    - https://www.kernel.org/pub/software/scm/git/git-2.49.0.tar.xz
+    - https://www.kernel.org/pub/software/scm/git/git-manpages-2.49.0.tar.xz
+homepage: https://git-scm.com/
+
+
+license: GPL-2.0-only, LGPL-2.1-or-later
+summary:  fast, scalable, distributed revision control system
+description: |
+  Git is a fast, scalable, distributed revision control system with an
+  unusually rich command set that provides both high-level operations
+phase: 5
+
+
+builddeps: [make, glibc, curl, python]
+
+buildsteps: |
+  ./configure --prefix=/usr \
+              --with-gitconfig=/etc/gitconfig \
+              --with-python=python3 &&
+  make
+
+  make perllibdir=/usr/lib/perl5/5.40/site_perl install
+
+  tar -xf ../git-manpages-2.49.0.tar.xz \
+      -C /usr/share/man --no-same-owner --no-overwrite-dir

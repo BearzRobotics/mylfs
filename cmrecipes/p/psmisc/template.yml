@@ -1,0 +1,27 @@
+name: psmisc
+version: 23.7
+release: 1
+url: https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-23.7.tar.xz
+homepage: https://gitlab.com/psmisc/psmisc
+
+license: GPL-2.0-or-later
+summary: PSMisc
+description: |
+  Small utilities that use the /proc filesystem
+  
+phase: 4
+order: 150
+critical: true
+
+buildsteps: |
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install

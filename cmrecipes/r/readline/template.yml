@@ -1,0 +1,31 @@
+name: readline
+version: 8.2.13
+release: 1
+url: https://ftp.gnu.org/gnu/readline/readline-8.2.13.tar.gz
+homepage: https://tiswww.case.edu/php/chet/readline/rltop.html
+
+license: GPL-3.0-or-later
+summary: Another console display library
+description: |
+  The GNU Readline library provides a set of functions for use by applications that allow users to edit command lines as they are typed in. Both Emacs and vi editing modes are available. The Readline library includes additional functions to maintain a list of previously-entered command lines, to recall and perhaps reedit those lines, and perform csh-like history expansion on previous commands.
+
+phase: 4
+order: 45
+critical: true
+builddeps: [ ncurses ]
+
+buildsteps: |
+  sed -i '/MV.*old/d' Makefile.in
+  sed -i '/{OLDSUFF}/c:' support/shlib-install
+
+  sed -i 's/-Wl,-rpath,[^ ]*//' support/shobj-conf
+
+  ./configure --prefix=/usr    \
+              --disable-static \
+              --with-curses    \
+              --docdir=/usr/share/doc/readline-{version}
+
+  make SHLIB_LIBS="-lncursesw"
+  make SHLIB_LIBS="-lncursesw" install
+
+  install -m644 doc/*.{ps,pdf,html,dvi} /usr/share/doc/readline-{version}

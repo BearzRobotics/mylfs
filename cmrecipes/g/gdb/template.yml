@@ -1,0 +1,26 @@
+name: gdb
+version: 16.2
+release: 1
+url: https://ftp.gnu.org/gnu/gdb/gdb-16.2.tar.xz
+homepage: https://www.sourceware.org/gdb/
+
+license: GPL-3.0-or-later
+summary:  GDB - The GNU Project Debugger
+description: |
+    GDB - The GNU Project Debugger
+phase: 5
+
+
+builddeps: [make, glibc, mpfr, xz, gmp, ncurses, elfutils, zlib, expat, python, readline, python-six]
+
+buildsteps: |
+    mkdir build
+    cd    build
+
+    ../configure --prefix=/usr          \
+                 --with-system-readline \
+                 --with-python=/usr/bin/python3
+    make
+
+    make -C gdb install &&
+    make -C gdbserver install

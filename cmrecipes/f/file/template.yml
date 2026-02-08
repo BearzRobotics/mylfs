@@ -1,0 +1,29 @@
+name: file
+version: 5.46
+release: 1
+url: https://astron.com/pub/file/file-5.46.tar.gz
+homepage: https://www.darwinsys.com/file/
+
+license: BSD-2-Clause
+summary: file (file type guesser)
+description: |
+  file is a command used to guess the "file type" of a file.  It reads the content to determine the data.
+
+phase: 4
+order: 40
+critical: true
+
+#builddeps: [ zlib, xz, bzip2, glibc,  make]
+
+buildsteps: |
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install

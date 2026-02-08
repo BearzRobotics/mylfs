@@ -1,0 +1,20 @@
+name: sysvinit
+version: 3.14
+release: 1
+url: https://github.com/slicer69/sysvinit/releases/download/3.14/sysvinit-3.14.tar.xz
+homepage: https://savannah.nongnu.org/projects/sysvinit
+
+license: GPL-2.0-or-later
+summary: Script based inti system for Linux.
+description: |
+  A legcy script based init system for Linux. 
+phase: 4
+order: 415
+critical: true
+
+buildsteps: |
+  patch -Np1 -i ../patches/sysvinit-3.14-consolidated-1.patch
+
+  make
+
+  make install

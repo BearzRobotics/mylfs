@@ -1,0 +1,18 @@
+name: jinja2
+version: 3.1.5
+release: 1
+url: https://pypi.org/packages/source/J/Jinja2/jinja2-3.1.5.tar.gz
+homepage: https://jinja.palletsprojects.com/en/3.1.x/
+
+license: BSD-3-Clause
+summary: A powerful templating engine for Python
+description: |
+  A powerful templating engine for Python
+phase: 4
+order: 370
+critical: true
+
+buildsteps: |
+  pip3 wheel -w dist --no-cache-dir --no-build-isolation --no-deps $PWD
+
+  pip3 install --no-index --no-user --find-links dist Jinja2

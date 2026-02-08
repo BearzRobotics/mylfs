@@ -1,0 +1,18 @@
+name: docutils
+version: 0.21.2
+release: 1
+url: https://files.pythonhosted.org/packages/source/d/docutils/docutils-0.21.2.tar.gz
+homepage: https://docutils.sourceforge.io/
+
+license: CC0-1.0, BSD-2-Clause, GPL-3.0-or-later, Python-2.0
+summary:  Python Documentation Utilities
+description: |
+    Python Documentation Utilities
+phase: 5
+
+
+builddeps: [python]
+
+buildsteps: |
+    pip3 wheel -w dist --no-build-isolation --no-deps --no-cache-dir $PWD
+    pip3 install --no-index --find-links dist --no-user docutils

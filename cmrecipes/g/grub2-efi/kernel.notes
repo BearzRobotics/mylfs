@@ -1,0 +1,17 @@
+Processor type and features --->
+  [*] EFI runtime service support                                          [EFI]
+  [*]   EFI stub support                                              [EFI_STUB]
+
+-*- Enable the block layer --->                                          [BLOCK]
+  Partition Types --->
+    [ /*] Advanced partition selection                      [PARTITION_ADVANCED]
+    [*]     EFI GUID Partition support                           [EFI_PARTITION]
+
+File systems --->
+  DOS/FAT/EXFAT/NT Filesystems --->
+    <*/M> VFAT (Windows-95) fs support                                 [VFAT_FS]
+  Pseudo filesystems --->
+    <*/M> EFI Variable filesystem                                    [EFIVAR_FS]
+  -*- Native language support --->                                         [NLS]
+    <*/M> Codepage 437 (United States, Canada)                [NLS_CODEPAGE_437]
+    <*/M> NLS ISO 8859-1  (Latin 1; Western European Languages)  [NLS_ISO8859_1]

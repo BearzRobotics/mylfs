@@ -1,0 +1,37 @@
+name: mandb
+version: 2.13.0
+release: 1
+url: https://download.savannah.gnu.org/releases/man-db/man-db-2.13.0.tar.xz
+homepage: https://www.nongnu.org/man-db/
+
+license: GPL-2.0-or-later
+summary: Tools for displaying and managing man pages
+description: |
+  Tools for displaying and managing man pages
+phase: 4
+order: 390
+critical: true
+
+builddeps: [ gdbm, libpipeline, less ]
+
+buildsteps: |
+  ./configure --prefix=/usr                            \
+              --docdir=/usr/share/doc/man-db-{version} \
+              --sysconfdir=/etc                        \
+              --disable-setuid                         \
+              --enable-cache-owner=bin                 \
+              --with-browser=/usr/bin/lynx             \
+              --with-vgrind=/usr/bin/vgrind            \
+              --with-grap=/usr/bin/grap                \
+              --with-systemdtmpfilesdir=               \
+              --with-systemdsystemunitdir=
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install

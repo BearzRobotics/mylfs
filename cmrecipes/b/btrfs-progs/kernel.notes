@@ -1,0 +1,12 @@
+File systems --->
+  <*/M> Btrfs filesystem support                                      [BTRFS_FS]
+
+Allow LVM2
+
+File systems --->
+  <*/M> Btrfs filesystem support                                      [BTRFS_FS]
+  [*]     Btrfs POSIX Access Control Lists                  [BTRFS_FS_POSIX_ACL]
+  [ ]     Btrfs will run sanity tests upon loading   [BTRFS_FS_RUN_SANITY_TESTS]
+  [ ]     Btrfs debugging support                                  [BTRFS_DEBUG]
+  [ ]     Btrfs assert support                                    [BTRFS_ASSERT]
+  [ ]     Btrfs with the ref verify tool compiled in       [BTRFS_FS_REF_VERIFY]

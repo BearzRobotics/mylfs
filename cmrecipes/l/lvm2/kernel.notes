@@ -1,0 +1,16 @@
+Device Drivers --->
+  [*] Block devices --->                                               [BLK_DEV]
+    <*/M> RAM block device support                                 [BLK_DEV_RAM]
+  [*] Multiple devices driver support (RAID and LVM) --->                   [MD]
+    <*/M> Device mapper support                                     [BLK_DEV_DM]
+    <*/M>   Crypt target support                                      [DM_CRYPT]
+    <*/M>   Snapshot target                                        [DM_SNAPSHOT]
+    <*/M>   Thin provisioning target                      [DM_THIN_PROVISIONING]
+    <*/M>   Cache target (EXPERIMENTAL)                               [DM_CACHE]
+    <*/M>   Mirror target                                            [DM_MIRROR]
+    <*/M>   Zero target                                                [DM_ZERO]
+    <*/M>   I/O delaying target                                       [DM_DELAY]
+
+Kernel hacking --->
+  Generic Kernel Debugging Instruments --->
+    [*] Magic SysRq key                                            [MAGIC_SYSRQ]

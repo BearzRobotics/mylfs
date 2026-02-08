@@ -7,7 +7,8 @@
 
 # LFS values
 # lft_tgt should be $(uname -m)-lfs-linux-gnu
-lfs_tgt: x86_64-lfs-linux-gnu
+# for cmrecipes this should be set to musl instead of gnu
+lfs_tgt: x86_64-lfs-linux-musl
 
 # used for install
 lfs_fs: ext4
@@ -47,7 +48,7 @@ build_path: "mnt/lfs/"
 
 # path to recipes dir
 # default is recipes_path: "recipes/"
-recipes_path: "dkrecipes/"
+recipes_path: "cmrecipes/"
 
 # only build the base system phase 1-4
 bootstrap_only: false

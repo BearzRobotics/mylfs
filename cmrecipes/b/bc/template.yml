@@ -1,0 +1,27 @@
+name: bc
+version: 7.0.3
+release: 1
+url: https://github.com/gavinhoward/bc/releases/download/7.0.3/bc-7.0.3.tar.xz
+homepage: https://git.gavinhoward.com/gavin/bc
+
+license: GPL-3.0-or-later
+summary: The Bc package contains an arbitrary precision numeric processing language.
+
+phase: 4
+order: 55
+critical: true
+
+#builddeps: [make, glibc]
+
+buildsteps: |
+  CC=gcc ./configure --prefix=/usr -G -O3 -r
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make test
+      set -e
+  fi
+
+  make install

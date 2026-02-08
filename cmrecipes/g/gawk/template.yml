@@ -1,0 +1,38 @@
+name: gawk
+version: 5.3.1
+release: 1
+url: https://ftp.gnu.org/gnu/gawk/gawk-5.3.1.tar.xz
+homepage: https://www.gnu.org/software/gawk/
+
+license: GPL-3.0-or-later
+summary: gawk - GNU Awk (Data extraction and reporting tool)
+description: |
+  gawk (GNU awk) is a tool used for data extraction and reporting from files, often used in file manipulation.
+
+phase: 4
+order: 300
+critical: true
+
+#builddeps: [ readline, mpfr, gmp, glibc, make ]
+
+buildsteps: |
+  sed -i 's/extras//' Makefile.in
+
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      chown -R tester .
+      su tester -c "PATH=$PATH make check"
+      set -e
+  fi
+
+  rm -f /usr/bin/gawk-{version}
+  make install
+
+  ln -svf gawk.1 /usr/share/man/man1/awk.1
+
+  mkdir -p                                   /usr/share/doc/gawk-{version}
+  cp      doc/{awkforai.txt,*.{eps,pdf,jpg}} /usr/share/doc/gawk-{version}

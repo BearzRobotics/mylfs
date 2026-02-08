@@ -1,0 +1,34 @@
+name: attr
+version: 2.5.2
+release: 1
+url: https://download.savannah.gnu.org/releases/attr/attr-2.5.2.tar.gz
+homepage: https://savannah.nongnu.org/projects/attr
+
+license: 
+  - GPL-2.0-or-later
+  - LGPL-2.1-or-later
+summary: Extended attribute shared library
+description: |
+  Contains the runtime environment required by programs that make use of extended attributes.
+  
+phase: 4
+order: 110
+critical: true
+
+builddeps: [ make]
+
+buildsteps: |
+  ./configure --prefix=/usr     \
+              --disable-static  \
+              --sysconfdir=/etc \
+              --docdir=/usr/share/doc/attr-{version}
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install

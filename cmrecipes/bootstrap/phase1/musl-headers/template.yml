@@ -1,0 +1,29 @@
+name: musl-headers
+version: 1.2.5
+release: 1
+url: https://musl.libc.org/releases/musl-1.2.5.tar.gz
+homepage: https://musl.libc.org/
+
+license: MIT
+summary: Lightweight and fast C standard library
+description: |
+  musl is a lightweight, fast, and simple implementation of the standard C library, intended for static linking and use in minimal, secure, and efficient Linux-based systems.
+
+phase: 1
+order: 3
+
+buildsteps: |
+  #export CC="clang"
+  #export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"
+
+  ./configure --prefix=$LFS/usr --syslibdir=$LFS/lib  
+  
+  # Not actually using
+  # --target=x86_64-pc-linux-gnu --build=x86_64-pc-linux-musl
+
+  make 
+  make install-headers

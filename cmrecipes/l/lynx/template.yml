@@ -1,0 +1,29 @@
+name: lynx
+version: 2.9.2
+release: 1
+url: https://invisible-mirror.net/archives/lynx/tarballs/lynx2.9.2.tar.bz2
+homepage: https://lynx.invisible-island.net/
+
+license: GPL-2.0-or-later
+summary: Text-based web browser
+description: |
+  Lynx is a text-based web browser for use on cursor-addressable character cell terminals.
+
+phase: 5
+buildsystem: make
+builddeps: [openssl, ncurses]
+
+buildsteps: |
+  ./configure --prefix=/usr           \
+              --sysconfdir=/etc/lynx  \
+              --with-zlib             \
+              --with-bzlib            \
+              --with-ssl              \
+              --with-screen=ncursesw  \
+              --enable-locale-charset \
+              --datadir=/usr/share/doc/lynx-{version}
+  make
+
+  make install-full
+  chgrp -v -R root /usr/share/doc/lynx-{version}/lynx_doc
+  

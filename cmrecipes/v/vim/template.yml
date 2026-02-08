@@ -1,0 +1,38 @@
+name: vim
+version: 9.1.1166
+release: 1
+url: https://github.com/vim/vim/archive/v9.1.1166/vim-9.1.1166.tar.gz
+homepage: https://www.vim.org/
+
+license: VIM
+summary: Vim is a prowerful CLI text editor 
+description: |
+  Vim is a prowerful CLI text editor 
+phase: 4
+order: 360
+critical: true
+#builddeps: [ ncurses ]
+
+buildsteps: |
+  echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
+
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      chown -R tester .
+      su tester -c "TERM=xterm-256color LANG=en_US.UTF-8 make -j1 test" \
+      &> vim-test.log
+      set -e
+  fi
+
+  make install
+
+  ln -svf vim /usr/bin/vi
+  for L in  /usr/share/man/{,*/}man1/vim.1; do
+      ln -svf vim.1 $(dirname $L)/vi.1
+  done
+
+  ln -sfv ../vim/vim91/doc /usr/share/doc/vim-{version}

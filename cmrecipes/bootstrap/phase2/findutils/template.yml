@@ -1,0 +1,25 @@
+name: findutils
+version: 4.10.0
+release: 1
+url: https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz
+homepage: https://www.gnu.org/software/findutils/
+
+license: GPL-3.0-or-later
+summary: findutils (basic directory searching utilities)
+description: |
+  findutils are basic directory searching tools and are often used with other programs for directory search and file locating.
+
+phase: 2
+order: 7
+critical: true
+
+buildsteps: |
+  export CFLAGS="-std=gnu99 -Wno-old-style-definition -static -I$LFS/usr/include -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -Wno-error=implicit-function-declaration"
+
+  ./configure --prefix=/usr                   \
+              --localstatedir=/var/lib/locate \
+              --host=$LFS_TGT                 \
+              --build=$(build-aux/config.guess)
+
+  make
+  make DESTDIR=$LFS install

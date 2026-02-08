@@ -1,0 +1,25 @@
+name: acl
+version: 2.3.2
+release: 1
+url: https://download.savannah.gnu.org/releases/acl/acl-2.3.2.tar.xz
+homepage: https://savannah.nongnu.org/projects/acl
+
+license: LGPL-2.1-only
+summary: Access control list shared library
+description: |
+  This package contains the libacl.so dynamic library containing the POSIX 1003.1e draft standard 17 functions for manipulating access control lists.
+
+phase: 4
+order: 115
+critical: true
+
+builddeps: [make, glibc]
+
+buildsteps: |
+  ./configure --prefix=/usr         \
+              --disable-static      \
+              --docdir=/usr/share/doc/acl-{version}
+
+  make
+
+  make install

@@ -1,0 +1,23 @@
+name: popt
+version: 1.19
+release: 1
+url: https://ftp.osuosl.org/pub/rpm/popt/releases/popt-1.x/popt-1.19.tar.gz
+homepage: https://rpm.org/
+
+
+license: MIT
+summary: A command line option parsing library
+
+buildsystem: make
+
+phase: 4
+order: 434
+critical: true
+
+builddeps: []
+rundeps: []
+
+buildsteps: |
+  ./configure --prefix=/usr --disable-static &&
+  make
+  make DESTDIR=$DESTDIR install

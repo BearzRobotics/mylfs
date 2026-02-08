@@ -1,0 +1,27 @@
+name: check
+version: 0.15.2
+release: 1
+url: https://github.com/libcheck/check/releases/download/0.15.2/check-0.15.2.tar.gz
+homepage: https://libcheck.github.io/check
+
+license: LGPL-2.1
+summary: C unit testing framework
+description: |
+  Check is a unit testing framework for C. It features a simple interface for defining unit tests, putting little in the way of the developer. Tests are run in a separate address space, so both assertion failures and code errors that cause segmentation faults or other signals can be caught. Test results are reportable in the following: Subunit, TAP, XML, and a generic logging format.
+phase: 4
+order: 290
+critical: true
+
+buildsteps: |
+  ./configure --prefix=/usr --disable-static
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make docdir=/usr/share/doc/check-{version} install
+

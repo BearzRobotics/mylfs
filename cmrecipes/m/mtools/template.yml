@@ -1,0 +1,19 @@
+name: mtools
+version: 4.0.48
+release: 1
+url: http://ftp.gnu.org/gnu/mtools/mtools-4.0.48.tar.gz
+homepage: https://www.gnu.org/software/mtools/
+
+license: GPL-3.0-or-later
+summary: Utilities to access MS-DOS disks without mounting
+description: |
+  mtools is a set of utilities to access MS-DOS disks without mounting them. It supports file operations like copying, renaming, and formatting on FAT file systems.
+
+phase: 5
+buildsystem: configure
+builddeps: [glibc, make]
+
+buildsteps: |
+  ./configure --prefix=/usr
+  make
+  make install

@@ -1,0 +1,25 @@
+name: man-pages
+version: 6.12
+release: 1
+url: https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.12.tar.xz
+homepage: https://www.kernel.org/doc/man-pages/
+
+license: 
+    - BSD-3-Clause
+    - GPL-1.0-or-later
+    - GPL-2.0-only # scripts/bash_aliases
+    - GPL-2.0-or-later # scripts/* (except bash_aliases), share/mk/pdf/book/prepare.pl
+    - GPL-3.0-or-later # src/bin/*
+    - LGPL-3.0-only WITH LGPL-3.0-linking-exception # share/mk/* (except pdf/book/prepare.pl), GNUmakefile
+    - MIT
+summary: Linux manual pages
+description: |
+  A large collection of manual pages from the Linux Documentation Project (LDP).
+  
+phase: 4
+order: 1
+critical: true
+
+buildsteps: |
+  rm -v man3/crypt*
+  make -R GIT=false prefix=/usr install

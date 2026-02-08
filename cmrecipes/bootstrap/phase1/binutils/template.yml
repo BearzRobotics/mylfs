@@ -1,0 +1,45 @@
+name: binutils
+version: 2.44.0
+release: 1
+url: https://sourceware.org/pub/binutils/releases/binutils-2.44.tar.xz
+homepage: https://www.gnu.org/software/binutils/
+
+license: GPL-3.0-or-later
+summary: contains a linker, an assembler, and other tools for handling object files
+description: |
+    The Binutils package contains a linker, an assembler, and other tools for handling object files.
+
+phase: 1
+order: 4
+
+
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 -static"
+  #export CFLAGS="-std=gnu99 --sysroot=$LFS -static"
+  #export LDFLAGS="--sysroot=$LFS -Wl"
+  #export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  #export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"    
+    
+  for p in ../patches/*.diff; do
+      echo "Applying patch $p"
+      patch -p1 < "$p"
+  done
+
+  mkdir build
+  cd build
+  ../configure --prefix=$LFS/tools \
+      --with-sysroot=$LFS \
+      --target=$LFS_TGT   \
+      --disable-nls       \
+      --enable-gprofng=no \
+      --disable-werror    \
+      --enable-new-dtags  \
+      --enable-default-hash-style=gnu
+    
+  export MAKE="${MAKE:-make} ${LIBTOOL_ARG:-}"
+  make all
+  make install
+
+

@@ -1,0 +1,18 @@
+name: curl
+version: 8.0.1
+release: 1
+url: https://curl.se/download/curl-8.0.1.tar.xz
+homepage: https://curl.se/
+
+license: curl
+summary: Command line tool and library for transferring data with URLs
+description: |
+  curl is a command-line tool for transferring data specified with URL syntax. It supports various protocols including HTTP, FTP, and others.
+
+phase: 5
+builddeps: [libpsl, libidn2, make, zlib, glibc, makeca_certs, openssl]
+
+buildsteps: |
+  ./configure --prefix=/usr --with-ssl
+  make
+  make install

@@ -1,0 +1,32 @@
+name: intltool
+version: 0.51.0
+release: 1
+url: https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz
+homepage: https://freedesktop.org/wiki/Software/intltool
+
+license: GPL-2.0-or-later
+summary:  The Intltool is an internationalization tool used for extracting translatable strings from source files.
+description: |
+  The Intltool is an internationalization tool used for extracting translatable strings from source files.
+
+phase: 4
+order: 215
+critical: true
+
+builddeps: [ perl, xmlparser ]
+
+buildsteps: |
+  sed -i 's:\\\${:\\\$\\{:' intltool-update.in
+
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+  install -Dm644 doc/I18N-HOWTO /usr/share/doc/intltool-0.51.0/I18N-HOWTO

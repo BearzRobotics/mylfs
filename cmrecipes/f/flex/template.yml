@@ -1,0 +1,31 @@
+name: flex
+version: 2.6.4
+release: 1
+url: https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
+homepage: https://github.com/westes/flex
+
+license: BSD-2-Clause
+summary: utility for generating programs that recognize patterns in text.
+
+phase: 4
+order: 60
+critical: true
+builddeps: [ make, glibc ]
+
+buildsteps: |
+  ./configure --prefix=/usr \
+              --docdir=/usr/share/doc/flex-{version} \
+              --disable-static
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check 
+      set -e
+  fi
+
+  make install
+
+  ln -svf flex /usr/bin/lex
+  ln -svf flex.1 /usr/share/man/man1/lex.1

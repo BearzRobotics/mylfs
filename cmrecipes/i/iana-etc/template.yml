@@ -1,0 +1,14 @@
+name: ianaetc
+version: 20250123
+release: 1
+url: https://github.com/Mic92/iana-etc/releases/download/20250123/iana-etc-20250123.tar.gz
+homepage: https://www.iana.org/protocols
+
+summary: Provides data for network services and protocols.
+
+phase: 4
+order: 5
+critical: true
+
+buildsteps: |
+  cp -v services protocols /etc

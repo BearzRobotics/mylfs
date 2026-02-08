@@ -1,0 +1,19 @@
+name: gnu-time
+version: 1.9
+release: 1
+url: https://ftp.gnu.org/gnu/time/time-1.9.tar.gz
+homepage: https://www.gnu.org/software/time/
+
+license: GPL-3.0-or-later
+summary: A tool for tracking the time it takes complete a task
+description: |
+  A tool for tracking the time it takes complete a task
+phase: 4
+order: 425
+critical: true
+
+
+buildsteps: |
+  ./configure --prefix=/usr
+  make
+  make install

@@ -1,0 +1,55 @@
+name: linux
+version: 6.13.9
+release: 1
+url: https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.13.9.tar.xz
+homepage: https://kernel.org/
+
+license: GPL-2.0 only
+summary: headers for the linux kernel
+description: |
+    The Linux kernel and modules, the core of the operating system
+
+phase: 4
+order: 445
+critical: true
+cleanup: false
+
+#builddeps: [bash, gcc, make, autoconf, automake, cpio, rsync, zlib, sed, coretutils, patch]
+
+buildsteps: |
+    # In case you update the kernel you must install new headers before you build.
+    # for safty we're going to install the kernel headers again. That way if you build a 
+    # new kernel you don't need to bootstrap the whole distro. -- As phase 4 packages should
+    # rebuild if you incriment the release from the last release.
+    
+    LFS_VERSION=12.3
+    make mrproper
+    
+    # offical LFS doesn't have us do this
+    # command requires rsync
+    make headers
+    make headers_install 
+
+    
+    
+    if [ -f ../config ]
+    then
+        cp ../config ./.config
+        make olddefconfig
+    else
+        make defconfig
+    fi
+
+    make
+
+    make modules_install
+
+    cp ./.config /boot/$CONFIGFILE
+
+    cp arch/x86_64/boot/bzImage /boot/vmlinuz-{version}-lfs-$LFS_VERSION
+
+    cp System.map /boot/System.map-{version}
+
+    mkdir -vp /usr/share/doc/linux-{version}
+    cp -r Documentation/* /usr/share/doc/linux-{version}
+

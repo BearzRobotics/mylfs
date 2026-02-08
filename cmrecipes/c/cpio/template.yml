@@ -1,0 +1,31 @@
+name: cpio
+version: 2.15
+release: 1
+url: https://ftp.gnu.org/gnu/cpio/cpio-2.15.tar.bz2
+homepage: https://www.gnu.org/software/cpio/
+
+license: GPL-3.0-or-later
+summary: The cpio package contains tools for archiving.
+description: |
+  The cpio package contains tools for archiving.
+phase: 4
+order: 430
+critical: true
+
+#builddeps: [make, glibc]
+
+buildsteps: |
+  ./configure --prefix=/usr \
+              --enable-mt   \
+              --with-rmt=/usr/libexec/rmt &&
+  make &&
+  makeinfo --html            -o doc/html      doc/cpio.texi &&
+  makeinfo --html --no-split -o doc/cpio.html doc/cpio.texi &&
+  makeinfo --plaintext       -o doc/cpio.txt  doc/cpio.texi
+
+  make install &&
+  install -v -m755 -d /usr/share/doc/cpio-{version}/html &&
+  install -v -m644    doc/html/* \
+                      /usr/share/doc/cpio-{version}/html &&
+  install -v -m644    doc/cpio.{html,txt} \
+                      /usr/share/doc/cpio-{version}

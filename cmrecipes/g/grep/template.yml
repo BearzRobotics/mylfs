@@ -1,0 +1,30 @@
+name: grep
+version: 3.11
+release: 1
+url: https://ftp.gnu.org/gnu/grep/grep-3.11.tar.xz
+homepage: https://www.gnu.org/software/grep/
+
+license: GPL-3.0-or-later
+summary: grep (pattern searching tool)
+description: |
+  grep stands for global / regular expression / print, and is used to search for patterns and strings within text files.
+
+phase: 4
+order: 165
+critical: true
+builddeps: [ pcre2, make, glibc ]
+
+buildsteps: |
+  sed -i "s/echo/#echo/" src/egrep.sh
+
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install

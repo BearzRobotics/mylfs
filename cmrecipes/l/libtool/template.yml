@@ -1,0 +1,30 @@
+name: libtool
+version: 2.5.4
+release: 1
+url: https://ftp.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz
+homepage: https://www.gnu.org/software/libtool/
+
+license: GPL-2.0-or-later
+summary: Generic library support script
+description: |
+  The Libtool package contains the GNU generic library support script. It wraps the complexity of using shared libraries in a consistent, portable interface.
+
+phase: 4
+order: 175
+critical: true
+builddeps: [ automake, autoconf, m4 ]
+
+buildsteps: |
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make -k check
+      set -e
+  fi
+
+  make install
+
+  rm -f /usr/lib/libltdl.a

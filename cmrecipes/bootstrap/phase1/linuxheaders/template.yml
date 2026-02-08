@@ -1,0 +1,21 @@
+name: linux-headers
+version: 6.13.9
+release: 1
+url: https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.13.9.tar.xz
+homepage: https://kernel.org/
+
+license: GPL-2.0 only
+summary: headers for the linux kernel
+description: |
+    The Linux kernel and modules, the core of the operating system
+
+phase: 1
+order: 2
+critical: true
+
+buildsteps: |
+    make mrproper
+    make headers
+
+    find usr/include -type f ! -name '*.h' -delete
+    cp -rv usr/include $LFS/usr

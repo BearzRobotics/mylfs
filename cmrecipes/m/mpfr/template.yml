@@ -1,0 +1,33 @@
+name: mpfr
+version: 4.2.1
+release: 1
+url: https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.1.tar.xz
+homepage: https://www.mpfr.org/
+
+license: GPL-3.0-or-later
+summary: The MPFR package contains functions for multiple precision math.
+description: |
+  The MPFR package contains functions for multiple precision math.
+  
+phase: 4
+order: 100
+critical: true
+builddeps: [ gmp ]
+
+buildsteps: |
+  ./configure --prefix=/usr        \
+              --disable-static     \
+              --enable-thread-safe \
+              --docdir=/usr/share/doc/mpfr-{version}
+
+  make
+  make html
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+  make install-html

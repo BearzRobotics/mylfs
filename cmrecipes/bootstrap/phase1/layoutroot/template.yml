@@ -1,0 +1,62 @@
+name: layoutroot
+version: 0.0.0
+release: 1
+
+license: GPL-2.0-only
+summary: used to create basic LFS file system layout
+
+phase: 1
+order: 1
+
+
+buildsteps: |
+  echo "Creating basic directory layout..."
+
+  #env
+
+  echo $LFS
+  echo $PATH
+
+  echo "double check what user I'm running on"
+  whoami
+
+
+  # LFS 12.3 Section 4.2
+  mkdir -vp $LFS/{etc,var} $LFS/usr/{bin,lib,sbin}
+  mkdir -p $LFS/{dev,proc,sys,run}
+  mkdir -p $LFS/etc/{opt,sysconfig,skel,profile.d}
+  mkdir -p $LFS/media/{floppy,cdrom}
+  mkdir -p $LFS/usr/{,local/}{include,src}
+  mkdir -p $LFS/usr/lib/locale
+  mkdir -p $LFS/usr/local/{bin,lib,sbin}
+  mkdir -p $LFS/usr/{,local/}share/{color,dict,doc,info,locale,man}
+  mkdir -p $LFS/usr/{,local/}share/{misc,terminfo,zoneinfo}
+  mkdir -p $LFS/usr/{,local/}share/man/man{1..8}
+  mkdir -p $LFS/var/{cache,local,log,mail,opt,spool}
+  mkdir -p $LFS/var/lib/{color,misc,locate}
+  mkdir -p $LFS/root
+  mkdir -p $LFS/mnt/{usb,lfs,cdrom,dvd}
+
+  for i in bin lib sbin; do
+      ln -svf usr/$i $LFS/$i
+  done
+
+  mkdir -p $LFS/lib/firmware
+
+  case $(uname -m) in
+    x86_64)
+      rm -rf $LFS/lib64 $LFS/usr/lib64
+      ln -svf usr/lib $LFS/lib64
+      ln -svf lib $LFS/usr/lib64
+      ;;
+  esac
+
+  mkdir -vp $LFS/tools
+
+  
+
+
+
+
+    
+

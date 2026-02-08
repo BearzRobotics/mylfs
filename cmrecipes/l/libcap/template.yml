@@ -1,0 +1,25 @@
+name: libcap
+version:  2.73
+release: 1
+url: https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.73.tar.xz
+homepage: https://sites.google.com/site/fullycapable/
+
+license: GPL-2.0-or-later
+summary: User-space interfaces to the POSIX 1003.1e capabilities available in Linux kernels
+description: |
+  User-space interfaces to the POSIX 1003.1e capabilities available in Linux kernels
+phase: 4
+order: 120
+critical: true
+
+buildsteps: |
+  sed -i '/install -m.*STA/d' libcap/Makefile
+  make prefix=/usr lib=lib
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make test
+      set -e
+  fi
+
+  make prefix=/usr lib=lib install

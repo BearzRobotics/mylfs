@@ -1,0 +1,4 @@
+File systems --->
+  DOS/FAT/EXFAT/NT Filesystems --->
+    < /*/M> MSDOS fs support                                          [MSDOS_FS]
+    <*/M>   VFAT (Windows-95) fs support                               [VFAT_FS]

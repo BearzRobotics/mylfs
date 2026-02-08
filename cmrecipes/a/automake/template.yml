@@ -1,0 +1,27 @@
+name: automake
+version: 1.17
+release: 1
+url: https://ftp.gnu.org/gnu/automake/automake-1.17.tar.xz
+homepage: https://www.gnu.org/software/automake/
+
+license: GPL-2.0-or-later
+summary: Automake is a tool for automatically generating `Makefile.in' files compliant with the GNU Coding Standards
+description: |
+  Automake is a tool for automatically generating `Makefile.in' files compliant with the GNU Coding Standards
+phase: 4
+order: 225
+critical: true
+
+
+buildsteps: |
+  ./configure --prefix=/usr --docdir=/usr/share/doc/automake-{version}
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make -j$(($(nproc)>4?$(nproc):4)) check
+      set -e
+  fi
+
+  make install

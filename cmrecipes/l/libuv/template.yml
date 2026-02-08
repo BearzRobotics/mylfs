@@ -1,0 +1,21 @@
+name: libuv
+version: 1.50.0
+release: 1
+url: https://dist.libuv.org/dist/v1.50.0/libuv-v1.50.0.tar.gz
+homepage: https://dist.libuv.org/
+
+license: 
+summary:  The libuv package is a multi-platform support library with a focus on asynchronous I/O.
+description: |
+    The libuv package is a multi-platform support library with a focus on asynchronous I/O.
+phase: 5
+
+
+builddeps: [make, glibc]
+
+buildsteps: |
+    sh autogen.sh                              
+    ./configure --prefix=/usr --disable-static 
+    make 
+
+    make install

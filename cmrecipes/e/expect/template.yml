@@ -1,0 +1,45 @@
+name: expect
+version: 5.45.4
+release: 1
+url: https://prdownloads.sourceforge.net/expect/expect5.45.4.tar.gz
+homepage: https://core.tcl.tk/expect/
+
+license: Public-Domain
+summary: Expect is a tool for automating and testing interactive applications
+description: |
+  Expect is a tool for automating interactive applications such as telnet, ftp, passwd, fsck, rlogin, tip, etc. Expect is also useful for testing these same applications.
+  
+phase: 4
+order: 75
+critical: true
+
+#builddeps: [make, glibc, tcl]
+
+buildsteps: |
+  PTYOUT=$(python3 -c 'from pty import spawn; spawn(["echo", "ok"])')
+  if [ "$PTYOUT" != "$(echo -ne 'ok\r\n')" ]
+  then
+      echo $PTYOUT
+      exit 1
+  fi
+
+  patch -Np1 -i ../patches/expect-5.45.4-gcc14-1.patch
+
+  ./configure --prefix=/usr           \
+              --with-tcl=/usr/lib     \
+              --enable-shared         \
+              --disable-rpath         \
+              --mandir=/usr/share/man \
+              --with-tclinclude=/usr/include
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make test 
+      set -e
+  fi
+
+  make install
+
+  ln -sf expect5.45.4/libexpect5.45.4.so /usr/lib
+

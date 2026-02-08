@@ -1,0 +1,25 @@
+name: btrfs-progs
+version: 6.14
+release: 1
+url: https://mirrors.edge.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v6.14.tar.xz
+homepage: https://btrfs.wiki.kernel.org/
+
+license: GPL-2.0-or-later
+summary: Utilities for managing Btrfs file systems
+description: |
+  btrfs-progs provides utilities for creating, checking, modifying, and recovering Btrfs file systems. It includes tools like mkfs.btrfs, btrfs check, and btrfs balance.
+
+phase: 5
+builddeps: [glibc, make, e2fsprogs, lzo, zlib]
+
+buildsteps: |
+  ./configure --prefix=/usr           \
+              --disable-static        \
+              --disable-documentation &&
+  make
+
+  make install
+
+  for i in 5 8; do
+    install Documentation/*.$i /usr/share/man/man$i
+  done

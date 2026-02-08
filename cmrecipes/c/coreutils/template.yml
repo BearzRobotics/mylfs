@@ -1,0 +1,46 @@
+name: coreutils
+version: 9.6
+release: 1
+url: https://ftp.gnu.org/gnu/coreutils/coreutils-9.6.tar.xz
+homepage: https://www.gnu.org/software/coreutils/
+
+license: GPL-3.0-or-later
+summary: GNU core utilities
+description: |
+  This package contains the basic file, shell and text manipulation utilities which are expected to exist on every operating system. 
+
+phase: 4
+order: 285
+critical: true
+#builddeps: [ attr, acl, gmp, openssl, glibc]
+
+buildsteps: |
+  # Coreutils cry when aclocal-1.16 isn't there
+  ln -svf aclocal-1.17 /usr/bin/aclocal-1.16
+  ln -svf automake-1.17 /usr/bin/automake-1.16
+
+  patch -Np1 -i ../patches/coreutils-9.6-i18n-1.patch
+  
+  autoreconf -fv
+  automake -af
+  FORCE_UNSAFE_CONFIGURE=1 ./configure \
+              --prefix=/usr            \
+              --enable-no-install-program=kill,uptime
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make NON_ROOT_USERNAME=tester check-root
+      groupadd -g 102 dummy -U tester
+      chown -R tester .  
+      su tester -c "PATH=$PATH make -k RUN_EXPENSIVE_TESTS=yes check" \
+      < /dev/null
+      groupdel dummy
+  fi
+
+  make install
+
+  mv /usr/bin/chroot /usr/sbin
+  mv /usr/share/man/man1/chroot.1 /usr/share/man/man8/chroot.8
+  sed -i 's/"1"/"8"/' /usr/share/man/man8/chroot.8

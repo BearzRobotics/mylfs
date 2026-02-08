@@ -1,0 +1,41 @@
+name: util-linux
+version: 2.40.4
+release: 1
+url: https://www.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.4.tar.xz
+homepage: https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git/
+
+license: 
+    - BSD-3-Clause
+    - BSD-4-Clause-UC
+    - GPL-2.0-only
+    - GPL-2.0-or-later
+    - LGPL-2.1-or-later
+    - Public-Domain
+summary: Essential Linux utilties
+description: |
+  Util-linux is a suite of essential tools for any Linux system, such as chsh, kill, cfdisk, mkfs, mount, and more.
+
+phase: 3
+order: 7
+critical: true
+
+buildsteps: |
+  mkdir -p /var/lib/hwclock
+
+  ./configure --libdir=/usr/lib     \
+              --runstatedir=/run    \
+              --disable-chfn-chsh   \
+              --disable-login       \
+              --disable-nologin     \
+              --disable-su          \
+              --disable-setpriv     \
+              --disable-runuser     \
+              --disable-pylibmount  \
+              --disable-static      \
+              --disable-liblastlog2 \
+              --without-python      \
+              ADJTIME_PATH=/var/lib/hwclock/adjtime \
+              --docdir=/usr/share/doc/util-linux-{version}
+
+  make
+  make install

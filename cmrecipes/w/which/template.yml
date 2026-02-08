@@ -1,0 +1,20 @@
+name: which
+version: 2.23
+release: 1
+url: https://ftp.gnu.org/gnu/which/which-2.23.tar.gz
+homepage: https://savannah.gnu.org/projects/which
+
+license: GPL-3.0-only
+summary:  Find a program in the path and display its location
+description: |
+    Find a program in the path and display its location
+phase: 5
+
+
+builddeps: [make, glibc]
+
+buildsteps: |
+    ./configure --prefix=/usr &&
+    make
+
+    make install

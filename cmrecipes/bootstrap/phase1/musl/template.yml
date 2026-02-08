@@ -1,0 +1,60 @@
+name: musl
+version: 1.2.5
+release: 1
+url: https://musl.libc.org/releases/musl-1.2.5.tar.gz
+homepage: https://musl.libc.org/
+
+license: MIT
+summary: Lightweight and fast C standard library
+description: |
+  musl is a lightweight, fast, and simple implementation of the standard C library, intended for static linking and use in minimal, secure, and efficient Linux-based systems.
+
+phase: 1
+order: 6
+
+buildsteps: |
+  export CC=x86_64-lfs-linux-musl-gcc
+  export CXX=x86_64-lfs-linux-musl-g++
+
+  
+  export AR_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/ar 
+  export AS_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/as 
+  export LD_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/ld 
+  export NM_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/nm 
+  export OBJCOPY_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/objcopy 
+  export OBJDUMP_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/objdump 
+  export RANLIB_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/ranlib 
+  export READELF_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/readelf 
+  export STRIP_FOR_TARGET=$LFS/tools/x86_64-lfs-linux-musl/bin/strip
+
+  ./configure --prefix=$LFS/usr --syslibdir=$LFS/lib  
+  
+
+
+
+  make 
+  make install
+
+  # dump gcc specs file
+  x86_64-lfs-linux-musl-gcc -dumpspecs > "$LFS/tools/lib/gcc/x86_64-lfs-linux-musl/14.2.0/specs"
+
+  # check if the specs file was actually created
+  if [ -f "$LFS/tools/lib/gcc/x86_64-lfs-linux-musl/14.2.0/specs" ]; then
+      # If it exists, patch it to point to musl dynamic loader
+      sed -i 's|%{!shared:.*-dynamic-linker.*}|%{!shared: -dynamic-linker /lib/ld-musl-x86_64.so.1 }|' \
+      "$LFS/tools/lib/gcc/x86_64-lfs-linux-musl/14.2.0/specs"
+  else
+      # If not, copy a premade specs file
+      cp -apvr ../static/specs "$LFS/tools/lib/gcc/x86_64-lfs-linux-musl/14.2.0/specs"
+  fi
+
+  # install the musl docs
+  mkdir -pv $LFS/usr/share/doc/
+  tar -xf ../static/musl-docs.tar.gz -C $LFS/usr/share/doc/
+
+  # /lib/ld-musl-x86_64.so.1 -> /mnt/data/code/py/mylfs-py/mnt/lfs/lib/libc.so
+  # To simplify my sysroot and later the chroot I'm having the symlink point right
+  # to the libc.so next to it.
+  cd $LFS/lib
+  ln -sf ./libc.so ld-musl-x86_64.so.1
+
