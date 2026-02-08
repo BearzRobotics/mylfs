@@ -185,4 +185,7 @@ bool deleteDirContents(Config cfg, const char *path){
     return true;
 }
 
+
+
+
 #endif /* A5A9851A_DE99_493B_96A6_F58B147C5071 */
