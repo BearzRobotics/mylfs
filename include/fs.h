@@ -17,6 +17,12 @@
 #include "config.h"
 #include "dprint.h"
 
+typedef struct {
+    char   **items;
+    size_t   len;
+    size_t   cap;
+} StrList;
+
 const char *mounts[] = {
     "/dev",
     "/dev/pts",
@@ -210,7 +216,10 @@ bool copyRecipeDir(Config cfg) {
 
 }
 
-bool doesFileExist(Config cfg, const char file) {
+
+
+
+bool doesFileExist(Config cfg, const char *file) {
     if (cfg.debug) {
         printf("[Debug] doesFileExist()\n");
     }
@@ -222,7 +231,7 @@ bool doesFileExist(Config cfg, const char file) {
     return false;
 }
  
-bool download(Config cfg, const char url, const char path) {
+bool download(Config cfg, const char *url, const char *path) {
     if (cfg.debug) {
         printf("[Debug] download()\n");
     }
