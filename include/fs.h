@@ -12,6 +12,7 @@
 #include <ftw.h>
 #include <errno.h>
 #include <sys/stat.h> // mkdir
+#include <unistd.h>
 
 #include "config.h"
 #include "dprint.h"
@@ -206,6 +207,40 @@ bool copyRecipeDir(Config cfg) {
     } else {
         passed("Passed: Completed copying %s -> %s/recipes\n", cfg.recipesPath, cfg.buildPath);
     }
+
+}
+
+bool doesFileExist(Config cfg, const char file) {
+    if (cfg.debug) {
+        printf("[Debug] doesFileExist()\n");
+    }
+
+    if (access(file, F_OK) == 0) {
+        return true; // file exist
+    }
+
+    return false;
+}
+ 
+bool download(Config cfg, const char url, const char path) {
+    if (cfg.debug) {
+        printf("[Debug] download()\n");
+    }
+
+    char cmd[4096];
+
+
+    snprintf(cmd, sizeof cmd,
+            "curl -L --fail --retry 3 -o '%s' '%s'",
+            path,
+            url);
+
+    if (system(cmd) != 0) {
+        failed("Failed to downloaded packages with curl!\n");
+        return false;
+    } 
+
+    return true;
 
 }
 
