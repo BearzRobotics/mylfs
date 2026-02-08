@@ -4,10 +4,10 @@
 
 
 
-void passed(const char *mesg);
-void built(int count, const char *mesg);
-void failed(const char *mesg);
-void skip(const char *mesg);
-void warn(const char *mesg);
-void header(const char *mesg);
+void info(const char *fmt, ...);
+void warn(const char *fmt, ...);
+void passed(const char *fmt, ...);
+void skip(const char *fmt, ...);
+void failed(const char *fmt, ...);
+void header(const char *fmt, ...);
 #endif

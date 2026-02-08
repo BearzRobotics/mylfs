@@ -118,7 +118,16 @@ int loadConfig(Config *cfg, const char *cfpath){
                 } else if (strcmp(current_key, "keep_logs") == 0) {
                     cfg->keepLogs = parse_bool(value);
                 } else if (strcmp(current_key, "build_path") == 0) {
-                    cfg->buildPath = strdup(realpath(value, NULL));
+                    char *rp = realpath(value, NULL);
+                    if (!rp) {
+                        perror("realpath");
+                            char cmd[4096];
+                        failed("build_path does not exist: %s\n     Create it first (e.g. mkdir -p '%s')\n", value, value);
+                        exit(1);
+                    }
+
+                    cfg->buildPath = rp;   // take ownership
+
                 } else if (strcmp(current_key, "recipes_path") == 0) {
                     cfg->recipesPath = strdup(realpath(value, NULL));
                 } else if (strcmp(current_key, "bootstrap_only") == 0) {
@@ -354,9 +363,12 @@ int main(int argc, char* argv[]) {
         }
     }
 
+
+
     // initalize recipes 
     //      Download packages
     // Copies recipes over
+    copyRecipeDir(cfg);
     // Create lfs user and group
     // chown buildDir to lfs user and group
 

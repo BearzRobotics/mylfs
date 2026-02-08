@@ -164,6 +164,8 @@ int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW
     return rv;
 }
 
+
+
 bool deleteDirContents(Config cfg, const char *path){
     if (cfg.debug) {
         printf("[debug] deleteDirContents Path: %s\n", path);
@@ -187,5 +189,24 @@ bool deleteDirContents(Config cfg, const char *path){
 
 
 
+bool copyRecipeDir(Config cfg) {
+    if (cfg.debug) {
+        printf("[Debug] copyRecipeDir()\n");
+    }
+
+    char cmd[4096];
+
+    snprintf(cmd, sizeof cmd,
+            "cp -a '%s' '%s/recipes'",
+            cfg.recipesPath,
+            cfg.buildPath);
+
+    if (system(cmd) != 0) {
+        failed("Failed to copy recipes\n");
+    } else {
+        passed("Passed: Completed copying %s -> %s/recipes\n", cfg.recipesPath, cfg.buildPath);
+    }
+
+}
 
 #endif /* A5A9851A_DE99_493B_96A6_F58B147C5071 */
