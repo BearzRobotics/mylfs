@@ -23,6 +23,9 @@ const char *mounts[] = {
     "/run",
 };
 
+// DJOK
+// Need to check if bindmounts are already mounted. If so skip it
+
 // bind mount /dev /dev/pts /proc /sys /run
 bool mountBind(Config cfg, char *cpath) {
     //man 2 mount

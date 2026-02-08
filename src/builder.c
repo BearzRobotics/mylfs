@@ -28,12 +28,13 @@ bool setPhase(Config cfg) {}
 // deletes dir
 bool cleanup(Config cfg) {}
 
+bool writeLogs(Config cfg) {}
+
 bool builderBootstrap(Config cfg) {
 
     if (cfg.debug) {
         printf("[debug] Entered the builder phase\n");
     }
-
             if (chroot(cfg.buildPath) != 0) {
                 perror("chroot to chrootPath Failed!\n");
                 exit(1);
