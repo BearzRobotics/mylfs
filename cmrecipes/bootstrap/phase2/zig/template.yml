@@ -1,0 +1,52 @@
+name: zig
+version: 0.16.0-dev.2510+bcb5218a2
+release: 1
+url: https://ziglang.org/builds/zig-x86_64-linux-0.16.0-dev.2510+bcb5218a2.tar.xz
+homepage: https://ziglang.org/
+
+license: MIT 2.0
+summary: Zig Compiler
+description: |
+    Zig Compiler
+
+phase: 2
+order: 18
+
+
+buildsteps: |
+    mv  zig $LFS/usr/bin 
+    mv  lib/* $LFS/usr/lib/
+
+    #!/bin/sh
+    set -e
+
+    WRAPPERS="
+    clang:zig cc
+    clang++:zig c++
+    cc:zig cc
+    c++:zig c++
+    ar:zig ar
+    ranlib:zig ranlib
+    strip:zig strip
+    "
+
+    for entry in $WRAPPERS; do
+        name=${entry%%:*}
+        cmd=${entry#*:}
+
+        cat > $LFS/usr/bin/$name <<EOF
+    #!/bin/sh
+    exec $cmd "\$@"
+    EOF
+    done
+
+    chmod +x \
+        $LFS/usr/bin/clang \
+        $LFS/usr/bin/clang++ \
+        $LFS/usr/bin/cc \
+        $LFS/usr/bin/c++ \
+        $LFS/usr/bin/ar \
+        $LFS/usr/bin/ranlib \
+        $LFS/usr/bin/strip
+
+    echo "Zig compiler wrappers installed in /usr/bin"

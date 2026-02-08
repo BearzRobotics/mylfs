@@ -10,6 +10,9 @@ order: 8
 critical: true
 
 buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  
   rm -rf /usr/share/{info,man,doc}/*
   find /usr/{lib,libexec} -name \*.la -delete
   rm -rf /tools

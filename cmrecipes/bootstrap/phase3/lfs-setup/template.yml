@@ -13,16 +13,16 @@ buildsteps: |
   # fix musl 
   # Clang
   ############################################
-  sed -i \
-  -e 's|^libc_lib=".*"|libc_lib="/usr/lib"|' \
-  -e 's|^ldso=".*"|ldso="/lib/ld-musl-x86_64.so.1"|' \
-  /bin/ld.musl-clang
+  #sed -i \
+  #-e 's|^libc_lib=".*"|libc_lib="/usr/lib"|' \
+  #-e 's|^ldso=".*"|ldso="/lib/ld-musl-x86_64.so.1"|' \
+  #/bin/ld.musl-clang
 
-  sed -i \
-  -e 's|^libc=".*"|libc="/usr"|' \
-  -e 's|^libc_inc=".*"|libc_inc="/usr/include"|' \
-  -e 's|^libc_lib=".*"|libc_lib="/usr/lib"|' \
-  /bin/musl-clang
+  #sed -i \
+  #-e 's|^libc=".*"|libc="/usr"|' \
+  #-e 's|^libc_inc=".*"|libc_inc="/usr/include"|' \
+  #-e 's|^libc_lib=".*"|libc_lib="/usr/lib"|' \
+  #/bin/musl-clang
 
 
   # /etc and /root in static were created with 
