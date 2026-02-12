@@ -14,12 +14,9 @@ order: 3
 critical: true
 
 buildsteps: |
-  export CC="clang"
-  export CXX="clang++"
-  
   ./configure --prefix=/usr \
               --docdir=/usr/share/doc/bison-3.8.2 \
-              --build=x86_64-linux-musl
+              
 
   make
   make install

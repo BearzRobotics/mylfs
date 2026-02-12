@@ -1,0 +1,29 @@
+# This package normally doesn't belong here. However, for some reason 
+# phase 3 was failing with ld trying to link against a libz.so.1 that shouldn't exist. 
+# This is an attempt to overcome the issue. -- A patch would be greatly welcome to 
+# remove this recipe to more faithfully follow the book.
+name: zlib
+version: 1.3.1
+release: 1
+url: https://zlib.net/fossils/zlib-1.3.1.tar.gz
+homepage: https://zlib.net/
+license: zlib
+summary: compression and decompression routines used by some programs.
+phase: 2
+order: 19
+critical: true
+buildsteps: | # needed if using : inside script
+  export CC="clang"
+  export CFLAGS="--sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  
+              
+  ./configure --prefix=$LFS/usr
+
+  grep -q '^make:' Makefile || \
+    sed -i '1i .PHONY: make\nmake: all\n' Makefile             
+   
+  make
+  make install

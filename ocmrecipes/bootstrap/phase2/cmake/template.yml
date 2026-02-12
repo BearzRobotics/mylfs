@@ -1,0 +1,29 @@
+name: cmake
+version: 4.0.0
+release: 1
+url: https://cmake.org/files/v4.0/cmake-4.0.0.tar.gz
+homepage: https://cmake.org/
+license: BSD-3-Clause
+summary: The CMake package contains a modern toolset used for generating Makefiles.
+description: |
+  The CMake package contains a modern toolset used for generating Makefiles. It is a successor of the auto-generated configure script and aims to be platform- and compiler-independent. A significant user of CMake is KDE since version 4.
+phase: 2
+order: 117
+
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  sed -i '/"lib64"/s/64//' Modules/GNUInstallDirs.cmake &&
+
+  ./bootstrap --prefix=$LFS/usr        \
+              --system-libs        \
+              --mandir=$LFS/share/man  \
+              --no-system-libs  \
+              --docdir=$LFS/share/doc/cmake-{version} &&
+  make
+
+  make install

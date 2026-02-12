@@ -48,7 +48,7 @@ build_path: "mnt/lfs/"
 
 # path to recipes dir
 # default is recipes_path: "recipes/"
-recipes_path: "cmrecipes/"
+recipes_path: "ocmrecipes/"
 
 # only build the base system phase 1-4
 bootstrap_only: false

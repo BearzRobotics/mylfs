@@ -16,7 +16,7 @@ buildsteps: |
   export CC=x86_64-lfs-linux-musl-gcc
   export CXX=x86_64-lfs-linux-musl-g++
   export CFLAGS="--sysroot=$LFS"
-  export LDFLAGS="--sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS --dynamic-linker=$LFS/lib/ld-musl-x86_64.so.1"
   unset GCC_NO_EXECUTABLES
   
   ls ../../gcc-stage0 

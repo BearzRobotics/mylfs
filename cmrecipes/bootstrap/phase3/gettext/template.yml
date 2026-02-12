@@ -14,8 +14,6 @@ order: 2
 critical: true
 
 buildsteps: |
-  export CC="clang"
-  export CXX="clang++"
   ./configure --disable-shared  --build=x86_64-linux-musl
 
   make

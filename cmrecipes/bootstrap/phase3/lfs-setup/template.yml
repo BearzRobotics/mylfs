@@ -10,20 +10,6 @@ order: 1
 critical: true
 
 buildsteps: |
-  # fix musl 
-  # Clang
-  ############################################
-  #sed -i \
-  #-e 's|^libc_lib=".*"|libc_lib="/usr/lib"|' \
-  #-e 's|^ldso=".*"|ldso="/lib/ld-musl-x86_64.so.1"|' \
-  #/bin/ld.musl-clang
-
-  #sed -i \
-  #-e 's|^libc=".*"|libc="/usr"|' \
-  #-e 's|^libc_inc=".*"|libc_inc="/usr/include"|' \
-  #-e 's|^libc_lib=".*"|libc_lib="/usr/lib"|' \
-  #/bin/musl-clang
-
 
   # /etc and /root in static were created with 
   # tar -czvf static_files.tar.gz etc/ root/
@@ -50,9 +36,10 @@ buildsteps: |
   echo "creating test user for later in the book. Will be cleaned up at end of phase 4"
   install -o tester -d /home/tester
 
+  # with dinit this isn't needed
+  #touch /etc/hostname
+  #chmod +x /etc/init.d/hostname
 
-  chmod +x /etc/init.d/hostname
-  touch /etc/hostname
   
   touch /var/log/{btmp,lastlog,faillog,wtmp}
   chgrp -v utmp /var/log/lastlog

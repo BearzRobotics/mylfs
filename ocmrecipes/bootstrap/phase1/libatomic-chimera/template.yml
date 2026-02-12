@@ -1,0 +1,22 @@
+name: libatomic-chimera
+version: 0.0.0
+release: 1
+homepage: https://github.com/chimera-linux/libatomic-chimera
+
+license: Apache-2.0
+summary: GCC ABI compatiable libatomic for use with clang + musl
+description: |
+  GCC ABI compatiable libatomic for use with clang + musl. It doesn't provided any header files.
+
+phase: 1
+order: 6
+
+buildsteps: |
+    export CC="clang"
+    export CXX="clang++"
+    export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+    export CFLAGS="--sysroot=$LFS -I$LFS/usr/include -static"
+    export CXXFLAGS="--sysroot=$LFS -I$LFS/usr/include"
+
+    make PREFIX=$LFS/
+    make PREFIX=$LFS/ install

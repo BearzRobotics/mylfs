@@ -1,0 +1,56 @@
+name: ncurses
+version: 6.5
+release: 1
+url: https://invisible-mirror.net/archives/ncurses/ncurses-6.5.tar.gz
+homepage: https://www.gnu.org/software/ncurses/
+license: X11 License
+summary: The ncurses library routines are a terminal-independent method of updating character screens with reasonable optimization.
+description: |
+  The ncurses library routines are a terminal-independent method of updating character screens with reasonable optimization. This package contains the shared libraries necessary to run programs compiled with ncurses.
+phase: 2
+order: 18
+critical: true
+buildsteps: |
+  set -e
+  export CFLAGS="-std=gnu99 --sysroot=$LFS -I$LFS/usr/include -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -Wno-error=implicit-function-declaration"
+  export CC="clang"
+  export CXX="clang++"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  export LD_RUN_PATH=$LFS/usr/lib
+  alias ldconfig=true
+
+  touch $LFS/usr/include/curses.h
+
+  mkdir -p build
+  pushd build
+    ../configure --prefix=$LFS/usr     --without-gpm    --host=x86_64-linux-musl
+    make -C include
+    make -C progs tic
+  popd
+
+  ./configure --prefix=$LFS/usr      \
+    --build=$(./config.guess)     \
+    --with-shared                 \
+    --without-normal              \
+    --without-cxx             \
+    --without-debug               \
+    --without-ada                 \
+    --without-tests \
+    --disable-stripping           \
+    --without-gpm   \
+    --host=x86_64-linux-musl  \
+    AWK=gawk
+
+  make && make install
+  #make libs
+  #make install.libs
+
+  rm $LFS/usr/include/curses.h
+
+  exit 0 # This is a hack to try and get it to work
+         # This needs to be rebuilt in stage 4 anyway
+         # c++ support. So if it gets us by until then 
+         # it's alright
+builddeps: []

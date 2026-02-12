@@ -51,7 +51,15 @@ cmrecipes/**/*.tar.bz2
 cmrecipes/**/*.tgz
 cmrecipes/**/*.zip
 
+ocmrecipes/**/*.tar.gz
+ocmrecipes/**/*.tar.xz
+ocmrecipes/**/*.tar.zst
+ocmrecipes/**/*.tar.bz2
+ocmrecipes/**/*.tgz
+0cmrecipes/**/*.zip
 
+# EXCEPTION: keep static_files.tar.gz in lfs-setup
+!ocmrecipes/bootstrap/phase3/lfs-setup/static/static_files.tar.gz
 
 # EXCEPTION: keep static_files.tar.gz in lfs-setup
 !cmrecipes/bootstrap/phase3/lfs-setup/static/static_files.tar.gz

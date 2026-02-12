@@ -14,14 +14,10 @@ order: 4
 
 
 buildsteps: |
-  export CC="clang"
-  export CXX="clang++"
+  export CC=clang
   export CFLAGS="-std=gnu99 -static"
-  #export CFLAGS="-std=gnu99 --sysroot=$LFS -static"
-  #export LDFLAGS="--sysroot=$LFS -Wl"
-  #export PKG_CONFIG_SYSROOT_DIR="$LFS"
-  #export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"    
-    
+  export LDFLAGS="--sysroot=$LFS -static"
+
   for p in ../patches/*.diff; do
       echo "Applying patch $p"
       patch -p1 < "$p"

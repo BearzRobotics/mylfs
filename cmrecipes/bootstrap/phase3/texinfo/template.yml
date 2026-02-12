@@ -14,9 +14,6 @@ order: 6
 critical: true
 
 buildsteps: |
-  export CC="clang"
-  export CXX="clang++"
-  
   ./configure --prefix=/usr --build=x86_64-linux-musl
 
   make

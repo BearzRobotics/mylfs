@@ -20,10 +20,15 @@ buildsteps: |
   export PKG_CONFIG_SYSROOT_DIR="$LFS"
   export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"
 
-  ./configure --prefix=$LFS/usr --syslibdir=$LFS/lib  
+  ./configure --prefix=$LFS/usr --syslibdir=$LFS/lib
   
   # Not actually using
   # --target=x86_64-pc-linux-gnu --build=x86_64-pc-linux-musl
 
   make 
   make install-headers
+
+
+  # install the musl docs
+  #mkdir -pv $LFS/usr/share/doc/
+  #tar -xf ../static/musl-docs.tar.gz -C $LFS/usr/share/doc/

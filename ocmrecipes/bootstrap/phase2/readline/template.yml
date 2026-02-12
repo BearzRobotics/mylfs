@@ -1,0 +1,35 @@
+name: readline
+version: 8.2.13
+release: 1
+url: https://ftp.gnu.org/gnu/readline/readline-8.2.13.tar.gz
+homepage: https://tiswww.case.edu/php/chet/readline/rltop.html
+license: GPL-3.0-or-later
+summary: Another console display library
+description: |
+  The GNU Readline library provides a set of functions for use by applications that allow users to edit command lines as they are typed in. Both Emacs and vi editing modes are available. The Readline library includes additional functions to maintain a list of previously-entered command lines, to recall and perhaps reedit those lines, and perform csh-like history expansion on previous commands.
+phase: 2
+order: 20
+
+builddeps: [ncurses]
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"    
+  
+  sed -i '/MV.*old/d' Makefile.in
+  sed -i '/{OLDSUFF}/c:' support/shlib-install
+
+  sed -i 's/-Wl,-rpath,[^ ]*//' support/shobj-conf
+
+  ./configure --prefix=$LFS/usr    \
+              --with-curses    \
+              --docdir=$LFS/usr/share/doc/readline-{version} \
+              --host=x86_64-linux-musl
+
+  make 
+  make install
+
+  install -m644 doc/*.{ps,pdf,html,dvi} $LFS/usr/share/doc/readline-{version}

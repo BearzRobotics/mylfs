@@ -12,9 +12,6 @@ order: 5
 critical: true
 
 buildsteps: |
-  export CC="clang"
-  export CXX="clang++"
-
   ./configure --prefix=/usr   \
               --enable-shared \
               --without-ensurepip \

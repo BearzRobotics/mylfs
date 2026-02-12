@@ -14,11 +14,13 @@ summary: GNU compiler collection
 description: |
     The GNU Compiler Collection includes front ends for C, C++, Objective-C, Fortran, Java, Ada, and Go, as well as libraries for these languages (libstdc++, libgcj,...). GCC was originally written as the compiler for the GNU operating system. The GNU system was developed to be 100% free software, free in the sense that it respects the user's freedom.
 phase: 1
-order: 5
+order: 6
 
 cleanup: false
 
 buildsteps: |    
+  #export LDFLAGS=" -all-static -static"
+
   tar -xf ../mpfr-4.2.1.tar.xz
   mv -v mpfr-4.2.1 mpfr
   tar -xf ../gmp-6.3.0.tar.xz
@@ -46,8 +48,6 @@ buildsteps: |
       --target=$LFS_TGT           \
       --prefix=$LFS/tools         \
       --with-sysroot=$LFS         \
-      --with-newlib               \
-      --without-headers           \
       --enable-default-pie        \
       --enable-default-ssp        \
       --disable-nls               \

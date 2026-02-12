@@ -1,0 +1,5 @@
+NAME="HolyFenrir's Linux From Scratch"
+VERSION=12.3
+ID=lfs
+PRETTY_NAME="Linux From Scratch LFS_VERSION"
+VERSION_CODENAME=lfs

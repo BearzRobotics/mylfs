@@ -1,0 +1,32 @@
+name: autoconf
+version: 2.72
+release: 1
+url: https://ftp.gnu.org/gnu/autoconf/autoconf-2.72.tar.xz
+homepage: https://www.gnu.org/software/autoconf/
+license: GPL-2.0-or-later
+summary: Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages.
+description: |
+  Autoconf creates a configuration script for a package from a template file that lists the operating system features that the package can use, in the form of M4 macro calls.
+phase: 2
+order: 28
+critical: true
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  
+  ./configure --prefix=$LFS/usr --host=x86_64-linux-musl
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check TESTSUITEFLAGS=-j4
+      set -e
+  fi
+
+  make install
+builddeps: []

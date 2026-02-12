@@ -1,0 +1,30 @@
+name: gawk
+version: 5.3.1
+release: 1
+url: https://ftp.gnu.org/gnu/gawk/gawk-5.3.1.tar.xz
+homepage: https://www.gnu.org/software/gawk/
+license: GPL-3.0-or-later
+summary: gawk - GNU Awk (Data extraction and reporting tool)
+description: |
+  gawk (GNU awk) is a tool used for data extraction and reporting from files, often used in file manipulation.
+phase: 2
+order: 9
+critical: true
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  
+  sed -i 's/extras//' Makefile.in
+
+  ./configure --prefix=$LFS/usr   \
+              --host=x86_64-linux-musl \
+              --build=$(build-aux/config.guess) \
+      
+
+  make
+  make install
+builddeps: []

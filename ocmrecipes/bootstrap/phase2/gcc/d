@@ -1,0 +1,36 @@
+#  rebuild
+  ########################################
+  make all-gcc           # build the compiler frontends (C + C++)
+  make all-target-libgcc # build libgcc for linking
+  make all               # build everything else, including libstdc++ for C++
+  make install           # install the compiler and runtime libraries
+
+  for tool in ; do
+      src="$LFS/tools/bin/$tool"
+      dst="$LFS/tools/bin/$tool"
+      
+      if [ -f "$src" ]; then
+          ln -sf "$src" "$dst"
+          echo "Linked $src -> $dst"
+      else
+          echo "Warning: $src does not exist"
+      fi
+  done
+
+  ln -sfv $LFS/tools/bin/x86_64-lfs-linux-musl-gcc $LFS/tools/bin/gcc
+  ln -sfv $LFS/tools/bin/x86_64-lfs-linux-musl-g++ $LFS/tools/bin/g++
+  
+
+  # libc++std
+  ########################################
+  cd ..
+  mkdir -pv c++build
+  cd c++build
+
+  ../libstdc++-v3/configure \
+      --host=$LFS_TGT                     \
+      --build=$LFS_TGT                    \
+      --prefix=/usr                       \
+      --disable-multilib                  \
+      --disable-nls                       \
+      --disable-libstdcxx-pch             

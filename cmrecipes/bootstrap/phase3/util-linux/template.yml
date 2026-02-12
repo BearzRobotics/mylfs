@@ -20,9 +20,6 @@ order: 7
 critical: true
 
 buildsteps: |
-  export CC="clang"
-  export CXX="clang++"
-
   mkdir -p /var/lib/hwclock
 
   ./configure --libdir=/usr/lib                     \

@@ -1,0 +1,17 @@
+#!/bin/sh
+# Set the hostname at boot time
+
+case "$1" in
+  start)
+    [ -f /etc/hostname ] && /bin/hostname "$(cat /etc/hostname)"
+    ;;
+  stop)
+    ;;
+  restart|reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|reload}"
+    exit 1
+esac

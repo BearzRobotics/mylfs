@@ -1,0 +1,52 @@
+name: perl
+version: 5.40.1
+release: 1
+url: https://www.cpan.org/src/5.0/perl-5.40.1.tar.xz
+homepage: https://www.perl.org/
+license:
+  - Artistic-1.0-Perl
+  - GPL-2.0-or-later
+  - GPL-1.0-or-later
+  - MIT
+summary: Perl
+description: |
+  An interpreted scripting language, known among some as "Unix's Swiss Army Chainsaw".
+phase: 2
+order: 20
+builddeps: [gdbm]
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  
+  export BUILD_ZLIB=False
+  export BUILD_BZIP2=0
+
+  sh Configure -des                                          \
+              -D prefix=$LFS/usr                                \
+              -D vendorprefix=$LFS/usr                          \
+              -D privlib=$LFS/usr/lib/perl5/5.40/core_perl      \
+              -D archlib=$LFS/usr/lib/perl5/5.40/core_perl      \
+              -D sitelib=$LFS/usr/lib/perl5/5.40/site_perl      \
+              -D sitearch=$LFS/usr/lib/perl5/5.40/site_perl     \
+              -D vendorlib=$LFS/usr/lib/perl5/5.40/vendor_perl  \
+              -D vendorarch=$LFS/usr/lib/perl5/5.40/vendor_perl \
+              -D man1dir=$LFS/usr/share/man/man1                \
+              -D man3dir=$LFS/usr/share/man/man3                \
+              -D pager="$LFS/usr/bin/less -isR"                 \
+              -D useshrplib                                 \
+              -D usethreads
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      TEST_JOBS=$(nproc) make test_harness
+      set -e
+  fi
+
+  make install
+  unset BUILD_ZLIB BUILD_BZIP2
