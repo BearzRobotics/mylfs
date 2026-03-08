@@ -62,5 +62,6 @@ static int findTemplates(const char *path, const struct stat *sb, int typeflag, 
 StrList scanRecpies(Config cfg);
 StrList buildOrderBootStrap(Config cfg, StrList RL);
 StrList buildOrderP5(Config cfg, StrList RL);
+void downloadTarballs(const char url);
 
 #endif /* BE242EA5_33D7_4833_8E93_AE49272194BC */

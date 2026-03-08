@@ -10,6 +10,7 @@
 #include "recipe.h"
 #include "config.h"
 #include "strlist.h"
+#include "dprint.h"
 
 static char *xstrdup(const char *s) {
     if (!s) return NULL;
@@ -75,8 +76,16 @@ StrList scanRecpies(Config cfg) {
     strlistInit(&rList);
     nftw(cfg.recipesPath, findTemplates, 16, FTW_PHYS);
     return rList;
-
 }
+
+void downloadTarballs(const char url) {
+
+
+    if (system("curl") != 0) {
+        failed("Failed to downloaded: [%s]", url);
+    }
+}
+
 
 StrList sortRecipes(StrList RL, short int phase) {
 

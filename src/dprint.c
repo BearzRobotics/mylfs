@@ -53,9 +53,9 @@ void failed(const char *fmt, ...) {
     va_end(ap);
     
     if (nocolor != NULL) {
-        printf("    [Failed]    %s", mesg);
+        fprintf(stderr, "    [Failed]    %s", mesg);
     } else {
-        printf("%s  [Failed]%s    %s", red, reset, mesg);
+        fprintf(stderr, "%s  [Failed]%s    %s", red, reset, mesg);
     }
 }
 
