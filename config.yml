@@ -30,6 +30,7 @@ recipes_path: "recipes/LFS12_3"
 bootstrap_only: false
 
 # If you want to pass a global custom param for make you pass it here
+# make flags are not passed during the first two phases to avoid complications
 make_flags: " "
 
 # If you want to pass global CFLAGS

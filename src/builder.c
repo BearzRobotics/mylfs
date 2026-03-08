@@ -15,48 +15,74 @@
 #include "dprint.h"
 #include "recipe.h"
 
-bool extractTarball() {
+const char * getTarballSuffix(const char *tarball){
+    static const char *suffixes[] = {
+        ".tar.gz", ".tgz", ".tar.bz2", ".tar.xz", ".tar.zst", ".tar", ".zip",
+        NULL  // sentinel to mark end of array
+    };
+
 
 }
 
+
+bool extractTarball(Config cfg, Recipe recipe, short int phase) {
+    if (cfg.debug) {
+        printf("    [debug] tarball name: [%s] Tarball path: [%s]\n", recipe.tarballName, recipe.tarballPath);
+    }
+    
+    // Setup our command buffer
+    char cmd[4096]; // Large to account for unkown tarball path/name size
+
+    // Get the suffix to know what command to run on it
+    const char *suffix = getTarballSuffix(recipe.tarballName);
+    if (suffix == NULL) {
+        failed("Unknown tarball format: %s", recipe.tarballName);
+    } else if (suffix == ".zip") {
+        snprintf(cmd, sizeof(cmd), "unzip -q %s -d %s", recipe.tarballPath);
+    } else {
+        // This might be bad practice but I'm for now assuming that everything else is tar
+        if (phase <= 1) {
+            // lfs is a hard coded user for building the system
+            snprintf(cmd, sizeof(cmd), "sudo --preserve-env -u lfs tar -xf %s -C %s --strip-components=1", recipe.tarballPath, recipe.recipeSource);
+        } else {
+            // Done inside the chroot from phase 2 and on.
+            snprintf(cmd, sizeof(cmd), "tar -xf %s -C %s --strip-components=1", recipe.tarballPath, recipe.recipeSource);
+        }
+
+    }
+
+
+    if (system(cmd) != 0) {
+        failed("Could not extract tarball: [%s]\n", recipe.tarballPath);
+        return false;
+    } else {
+        return true;
+    }
+}
 // load phase.yaml and grab it
-short getPhase(Config cfg) {}
+short getPhase(Config cfg) {
+    return 0;
+}
 
 // Updates the phase number in the phase.yaml
-bool setPhase(Config cfg) {}
+bool setPhase(Config cfg) {
+    return true;
+}
 
 // deletes dir
-bool cleanup(Config cfg) {}
+bool cleanup(Config cfg) {
+    return true;
+}
 
-bool writeLogs(Config cfg) {}
+bool writeLogs(Config cfg) {
+    return true;
+}
 
-bool builderBootstrap(Config cfg) {
-
-    if (cfg.debug) {
-        printf("[debug] Entered the builder phase\n");
-    }
-            if (chroot(cfg.buildPath) != 0) {
-                perror("chroot to chrootPath Failed!\n");
-                exit(1);
-            }
-        
-            if (chdir("/") != 0) {
-                perror("chdir");
-                exit(1);
-            }
-            
-            // man exec(3) -- _GNU_SOURCE
-            // While for the --chroot this was alright, execl is not the right
-            // one for the builder
-            // TLPI pg 563 - 589
-            if (execl("/bin/sh", "sh" "--login", NULL) != 0) {
-                perror("execl\n");
-                exit(1);
-            }
-           
-            exit(0);
-
+bool builderBootstrap(Config cfg) {   
+    return true;
 } 
 
 
-bool builderPhase5(Config cfg) {}
+bool builderPhase5(Config cfg) {
+    return true;
+}

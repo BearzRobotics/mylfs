@@ -3,7 +3,7 @@ CC=clang
 CXX=clang++
 
 
-FLAGS  := -std=c99 -Wall -Wextra -Wpedantic -Wempty-translation-unit -O2 -g -Wnopointer-integer-compare
+FLAGS  := -std=c99 -Wall -Wextra -Wpedantic -Wmacro-redefined -Wempty-translation-unit -O2 -g -Wnopointer-integer-compare
 LDFLAGS := -static -lyaml
 INCLUDES:= -Iinclude
 

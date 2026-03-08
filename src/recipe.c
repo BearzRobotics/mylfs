@@ -49,12 +49,35 @@ void recipeFree(Recipe *r) {
 }
 
 
+void recipelistInit(RecipeList *v) {
+    v->size = 0;
+    v->cap = 8;
+    v->data = malloc(v->cap * sizeof(char*));
+}
+void recipelistFree(RecipeList *v) {
+     free(v->data);
+}
+void recipelistPush(RecipeList *v, Recipe *value) {
+    if (v->size == v->cap) {
+        v->cap *= 2;                                          // missing - you must grow cap
+        v->data = realloc(v->data, v->cap * sizeof(Recipe)); // realloc only, no malloc here
+        if (!v->data) {
+            perror("realloc");
+            exit(1);
+        }
+    }
+    v->data[v->size++] = *value;                             // dereference * as compiler told you
+}
+
 static StrList rList;  // global or pass via workaround since nftw callback has fixed signature
 
 // Loads a single recipes
-Recipe loadRecipe(Config cfg) {
+Recipe loadRecipe(Config cfg, const char *templatPath) {
+    FILE *fh = fopen(templatPath, "r");
 
 }
+
+RecipeList loadAllRecipes(Config cfg) {}
 
 static Config *currentCfg; // This is to enable debug in the findTemplates function
                            // Should not be used for any other function
@@ -78,23 +101,28 @@ StrList scanRecpies(Config cfg) {
     return rList;
 }
 
-void downloadTarballs(const char url) {
+void downloadTarballs(const char *url) {
+    // We need to construct the wget string to download packages
+    char cmd[4096]; // This might seem big, but I don't want a url failing to download
+                    // because it couldn't fit in the buffer
 
+    // buffer, we need to get the size of our buffer
+    snprintf(cmd, sizeof(cmd), "wget -nc %s", url);
 
-    if (system("curl") != 0) {
+    if (system(cmd) != 0) {
         failed("Failed to downloaded: [%s]", url);
     }
 }
 
 
 StrList sortRecipes(StrList RL, short int phase) {
-
+    return RL;
 }
 
 StrList buildOrderBootStrap(Config cfg, StrList RL) {
-
+    return RL;
 }
 
 StrList buildOrderP5(Config cfg, StrList RL) {
-    
+    return RL;   
 }

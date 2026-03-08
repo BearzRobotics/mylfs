@@ -93,6 +93,7 @@ into zig until that settles.
 # build deps
 [] - GNU Make
 [] - libyaml
+[] - working c compiler
 
 # runtime deps
 [] - Rsync
@@ -102,6 +103,7 @@ into zig until that settles.
 [] - autotools
 [] - coreutils
 [] - qemu
+[] - wget
 
 # Things I hate about C!
    * glibc is a nightmare to program with. With access unix features only working

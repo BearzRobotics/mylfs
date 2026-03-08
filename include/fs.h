@@ -205,8 +205,10 @@ bool copyRecipeDir(Config cfg) {
 
     if (system(cmd) != 0) {
         failed("Failed to copy recipes\n");
+        return false;
     } else {
         passed("Passed: Completed copying %s -> %s/recipes\n", cfg.recipesPath, cfg.buildPath);
+        return true;
     }
 
 }

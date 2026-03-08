@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h> //getuid
+#include <unistd.h> //getuid chown
 #include <errno.h>
 #include <limits.h>
 
@@ -18,6 +18,7 @@
 #include "phase.h"
 #include "fs.h"
 #include "recipe.h"
+#include "user.h"
 
 // mounts is an array that holds these paths
 
@@ -367,12 +368,34 @@ int main(int argc, char* argv[]) {
 
 
     // initalize recipes 
-    scanRecpies(cfg);
+    StrList templatePath = scanRecpies(cfg);
+    static RecipeList recpies;
+    recipelistInit(&recpies);
+
+    //loadRecipes(cfg, templatePath, &recpies);
+
+
     //      Download packages
+
     // Copies recipes over
     copyRecipeDir(cfg);
-    // Create lfs user and group
-    // chown buildDir to lfs user and group
+    
+    // lfs users 
+    if (lfsUserExist() == true) {
+        warn("lfs already existed!\n");
+    } else {
+        // create lfs user
+        if (creatLfsUser() == false) {
+            failed("Could not create the lfs user!\n");
+            exit(1);
+        } else {
+            passed("lfs user succefully created\n");
+        }
+    }
+
+    if (chownLfsFiles == false) {
+        failed("To setup .bashrc, .bash_profile or chown %s\n", cfg.buildPath);
+    }
 
     if (cfg.phase == CROSS_TOOLS) {
         header("Phase 1 - Cross Tools");
@@ -398,5 +421,18 @@ int main(int argc, char* argv[]) {
         header("Phase 5 - Building extra packages per the recipes!");
     }
 
+
+    // -----------------------------------------------------------
+    // Cleanup
+    // -----------------------------------------------------------
+    recipelistFree(&recpies);
+    if (deleteLfsUser() == false) {
+        failed("Could not delete the LFS user\n");
+    } else {
+        passed("User 'lfs' deleted successfully\n");
+    }
+    
+ 
+ 
     return 0;
 }
