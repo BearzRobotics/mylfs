@@ -1,9 +1,11 @@
 #ifndef BE242EA5_33D7_4833_8E93_AE49272194BC
 #define BE242EA5_33D7_4833_8E93_AE49272194BC
 
+#define _XOPEN_SOURCE 500
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <ftw.h>
 
 #include "phase.h"
 #include "config.h"
@@ -55,9 +57,9 @@ void recipeFree(Recipe *r);
 void recipe_array_init(RecipeList *a);
 void recipe_array_free(RecipeList *a);
 Recipe *recipe_array_push(RecipeList *a); // returns pointer to new blank Recipe slot
+static int findTemplates(const char *path, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 
-
-StrList findRecpies(Config cfg);
+StrList scanRecpies(Config cfg);
 StrList buildOrderBootStrap(Config cfg, StrList RL);
 StrList buildOrderP5(Config cfg, StrList RL);
 

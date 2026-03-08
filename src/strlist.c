@@ -14,8 +14,8 @@ void strlistPush(StrList *v, char *value) {
             perror("realloc");
             exit(1);
         }
-        v->data[v->size++] = value;
     }
+    v->data[v->size++] = value;
 }
 
 

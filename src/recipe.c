@@ -1,6 +1,9 @@
+#define _XOPEN_SOURCE 500
+
 #include <stdbool.h>
-#include <sys/types.h> // opendir() closedir() readdir()
-#include <dirent.h> // opendir() closedir() readdir()  dirent struct
+#include <ftw.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include <yaml.h>
 
@@ -44,37 +47,35 @@ void recipeFree(Recipe *r) {
     *r = (Recipe){0};
 }
 
+
+static StrList rList;  // global or pass via workaround since nftw callback has fixed signature
+
 // Loads a single recipes
 Recipe loadRecipe(Config cfg) {
 
 }
 
+static Config *currentCfg; // This is to enable debug in the findTemplates function
+                           // Should not be used for any other function
+
+// nftw has a strict fixed calling parameters.
+static int findTemplates(const char *path, const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
+    if (typeflag == FTW_F && strcmp(path + ftwbuf->base, "template.yml") == 0) {
+        if (currentCfg->debug) {
+            fprintf(stderr, "recipe.c - findTemplates(): [%s]\n", path);
+        }
+        strlistPush(&rList, strdup(path));
+    }
+    return 0;  // return non-zero to stop traversal early
+}
 
 // Finds all recipes files in buildDir
-StrList findRecpies(Config cfg) {
-    struct dirent *pDirent; // Creates a copy of the dirent struct to manage our files.
-    DIR *bDir;
-    bDir = opendir(cfg.recipesPath);
-    if (bDir == NULL) {
-        perror("opendir");
-        fprintf(stderr, "Failed to opendir %s", cfg.recipesPath);
-        exit(-1);
-    }
+StrList scanRecpies(Config cfg) {
+    currentCfg = &cfg;
+    strlistInit(&rList);
+    nftw(cfg.recipesPath, findTemplates, 16, FTW_PHYS);
+    return rList;
 
-    // Creates our recipe struct to hold all of our template.yml
-    struct StrList *rList;
-
-
-    
-    // We need to loop through every dir and build a list of all template.yml
-    // eg. recipes/b/bash/template.yml
-    while ((pDirent = readdir(bDir)) != NULL) {
-        printf("[%s]\n", pDirent->d_name);
-
-    }
-
-
-    closedir(bDir);
 }
 
 StrList sortRecipes(StrList RL, short int phase) {

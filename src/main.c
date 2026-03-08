@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
 
 
     // initalize recipes 
-    findRecpies(cfg);
+    scanRecpies(cfg);
     //      Download packages
     // Copies recipes over
     copyRecipeDir(cfg);
