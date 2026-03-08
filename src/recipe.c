@@ -1,11 +1,12 @@
 #include <stdbool.h>
+#include <sys/types.h> // opendir() closedir() readdir()
+#include <dirent.h> // opendir() closedir() readdir()  dirent struct
 
 #include <yaml.h>
 
 #include "recipe.h"
 #include "config.h"
-
-
+#include "strlist.h"
 
 static char *xstrdup(const char *s) {
     if (!s) return NULL;
@@ -16,38 +17,15 @@ static char *xstrdup(const char *s) {
     return p;
 }
 
-/* ---------- StrList ---------- */
-void strlist_init(StrList *l) { *l = (StrList){0}; }
-
-bool strlist_push(StrList *l, const char *s) {
-    if (l->len == l->cap) {
-        size_t ncap = l->cap ? l->cap * 2 : 8;
-        char **n = (char**)realloc(l->items, ncap * sizeof(char*));
-        if (!n) return false;
-        l->items = n;
-        l->cap = ncap;
-    }
-    l->items[l->len] = xstrdup(s);
-    if (!l->items[l->len]) return false;
-    l->len++;
-    return true;
-}
-
-void strlist_free(StrList *l) {
-    for (size_t i = 0; i < l->len; i++) free(l->items[i]);
-    free(l->items);
-    *l = (StrList){0};
-}
-
 /* ---------- Recipe ---------- */
-void recipe_init(Recipe *r) {
+void recipeInit(Recipe *r) {
     *r = (Recipe){0};
     r->phase = CROSS_TOOLS;   // whatever your enum uses for “unset”
-    strlist_init(&r->builddeps);
-    strlist_init(&r->rundeps);
+    strlistInit(&r->builddeps);
+    strlistInit(&r->rundeps);
 }
 
-void recipe_free(Recipe *r) {
+void recipeFree(Recipe *r) {
     free(r->name);
     free(r->version);
     free(r->buildsteps);
@@ -60,32 +38,10 @@ void recipe_free(Recipe *r) {
     free(r->path);
     free(r->root);
 
-    strlist_free(&r->builddeps);
-    strlist_free(&r->rundeps);
+    strlistFree(&r->builddeps);
+    strlistFree(&r->rundeps);
 
     *r = (Recipe){0};
-}
-
-/* ---------- RecipeList ---------- */
-void recipe_array_init(RecipeList *a) { *a = (RecipeList){0}; }
-
-Recipe *recipe_array_push(RecipeList *a) {
-    if (a->len == a->cap) {
-        size_t ncap = a->cap ? a->cap * 2 : 64;
-        Recipe *n = (Recipe*)realloc(a->items, ncap * sizeof(Recipe));
-        if (!n) return NULL;
-        a->items = n;
-        a->cap = ncap;
-    }
-    Recipe *slot = &a->items[a->len++];
-    recipe_init(slot);
-    return slot;
-}
-
-void recipe_array_free(RecipeList *a) {
-    for (size_t i = 0; i < a->len; i++) recipe_free(&a->items[i]);
-    free(a->items);
-    *a = (RecipeList){0};
 }
 
 // Loads a single recipes
@@ -95,18 +51,40 @@ Recipe loadRecipe(Config cfg) {
 
 
 // Finds all recipes files in buildDir
-RecipeList findRecpies() {
+StrList findRecpies(Config cfg) {
+    struct dirent *pDirent; // Creates a copy of the dirent struct to manage our files.
+    DIR *bDir;
+    bDir = opendir(cfg.recipesPath);
+    if (bDir == NULL) {
+        perror("opendir");
+        fprintf(stderr, "Failed to opendir %s", cfg.recipesPath);
+        exit(-1);
+    }
+
+    // Creates our recipe struct to hold all of our template.yml
+    struct StrList *rList;
+
+
+    
+    // We need to loop through every dir and build a list of all template.yml
+    // eg. recipes/b/bash/template.yml
+    while ((pDirent = readdir(bDir)) != NULL) {
+        printf("[%s]\n", pDirent->d_name);
+
+    }
+
+
+    closedir(bDir);
+}
+
+StrList sortRecipes(StrList RL, short int phase) {
 
 }
 
-RecipeList sortRecipes(RecipeList RL, short int phase) {
+StrList buildOrderBootStrap(Config cfg, StrList RL) {
 
 }
 
-RecipeList buildOrderBootStrap(RecipeList RL) {
-
-}
-
-RecipeList buildOrderP5(RecipeList RL) {
+StrList buildOrderP5(Config cfg, StrList RL) {
     
 }

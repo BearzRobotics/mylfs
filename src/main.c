@@ -17,6 +17,7 @@
 #include "dprint.h"
 #include "phase.h"
 #include "fs.h"
+#include "recipe.h"
 
 // mounts is an array that holds these paths
 
@@ -366,6 +367,7 @@ int main(int argc, char* argv[]) {
 
 
     // initalize recipes 
+    findRecpies(cfg);
     //      Download packages
     // Copies recipes over
     copyRecipeDir(cfg);

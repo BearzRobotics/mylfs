@@ -13,7 +13,7 @@ typedef struct {
     char *lfs_tgt;
     bool keepLogs;
     char *buildPath;
-    char *recipesPath;
+    const char *recipesPath;
     bool bootstrap;
     char *versionCheck;
     char *makeFlags;

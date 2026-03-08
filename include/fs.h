@@ -16,12 +16,7 @@
 
 #include "config.h"
 #include "dprint.h"
-
-typedef struct {
-    char   **items;
-    size_t   len;
-    size_t   cap;
-} StrList;
+#include "strlist.h"
 
 const char *mounts[] = {
     "/dev",
@@ -237,8 +232,6 @@ bool download(Config cfg, const char *url, const char *path) {
     }
 
     char cmd[4096];
-
-
     snprintf(cmd, sizeof cmd,
             "curl -L --fail --retry 3 -o '%s' '%s'",
             path,
@@ -250,7 +243,6 @@ bool download(Config cfg, const char *url, const char *path) {
     } 
 
     return true;
-
 }
 
 #endif /* A5A9851A_DE99_493B_96A6_F58B147C5071 */

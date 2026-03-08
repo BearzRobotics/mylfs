@@ -15,6 +15,8 @@
 #include "dprint.h"
 
 // Test whether the LFS user exist
+// NOTE: getpwnam requires glibc NSS at runtime even in static builds.
+// This binary is intended for musl-based systems where this is not an issue.
 bool lfsUserExist(void) {
     // man getpwnam
     // when creating a variable that returns a pointer from a struct

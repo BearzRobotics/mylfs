@@ -7,13 +7,7 @@
 
 #include "phase.h"
 #include "config.h"
-
-typedef struct {
-    char   **items;
-    size_t   len;
-    size_t   cap;
-} StrList;
-
+#include "strlist.h"
 
 typedef struct {
     /* Required */
@@ -54,16 +48,17 @@ typedef struct {
 } RecipeList;
 
 /* ---- helpers ---- */
-void strlist_init(StrList *l);
-void strlist_free(StrList *l);
-bool strlist_push(StrList *l, const char *s);
 
-void recipe_init(Recipe *r);
-void recipe_free(Recipe *r);
+void recipeInit(Recipe *r);
+void recipeFree(Recipe *r);
 
 void recipe_array_init(RecipeList *a);
 void recipe_array_free(RecipeList *a);
 Recipe *recipe_array_push(RecipeList *a); // returns pointer to new blank Recipe slot
 
+
+StrList findRecpies(Config cfg);
+StrList buildOrderBootStrap(Config cfg, StrList RL);
+StrList buildOrderP5(Config cfg, StrList RL);
 
 #endif /* BE242EA5_33D7_4833_8E93_AE49272194BC */

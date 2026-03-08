@@ -111,6 +111,11 @@
         It should also be noted that the python version may seem to have more 
         functionality, but most of those features were never implemented.
 
+        If built against glibc even though -static is passed the use of getpwnam
+        will require dynamically loading  glibc. -- This should not be an issue
+        if built against musl. -- Though if not building in a native musl
+        enviroment all of mylfs deps must also be built against musl.
+
 # AUTHOR
     Author: Dakota James Owen Keeler
     Email: DakotaJKeeler@protonmail.com
