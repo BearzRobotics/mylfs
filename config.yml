@@ -23,8 +23,8 @@ keep_logs: true
 build_path: "mnt/lfs"
 
 # path to recipes dir
-# default is recipes_path: "recipes/"
-recipes_path: "recipes/"
+# default is recipes_path: "recipes/LFS12_3"
+recipes_path: "recipes/LFS12_3"
 
 # only build the base system phase 1-4
 bootstrap_only: false

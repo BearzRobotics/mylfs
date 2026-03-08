@@ -6,7 +6,7 @@ as mylfs was executed from.
 
 ```console
 $ ls 
-logs mnt recipes mylfs
+logs mnt recipes/<current recipes> mylfs
 ```
 
 In the recipes directory they're a bootstrap directory, [0-9] & [a-z]
@@ -30,34 +30,35 @@ each time mylfs is run.
 
 # Recipes structure
 recipes/
-├── bootstrap/
-│   └── phase1/
-│       └── glibc/
-│           ├── source/         # required
-│           │                       If there is no source.tar.gz or other
-│           │                       supported format this directory must exist 
-│           │                       as its the default location the builder will 
-│           │                       enter.
-│           ├── template.yaml   # required  
-│           ├── source.tar.gz   # optional   
-│           ├── patches/        # optional  
-│           ├── static/         # optional  
-├── b/
-│   └── bash/
-│       ├── source/             # required
-│       ├── template.yaml       # required
-│       ├── source.tar.gz       # optional
-│       │                           If a url is provided this  will be downloaded
-│       │ 
-│       ├── patches/            # optional  
-│       ├── static/             # optional
-├── l/
-│   └── linux/
-│       ├── source/             # required
-│       ├── template.yaml       # required
-│       ├── source.tar.gz       # optional
-│       ├── patches/            # optional
-│       └── config              # optional
+├── LFS12_3
+    ├── bootstrap/
+    │   └── phase1/
+    │       └── glibc/
+    │           ├── source/         # required
+    │           │                       If there is no source.tar.gz or other
+    │           │                       supported format this directory must exist 
+    │           │                       as its the default location the builder will 
+    │           │                       enter.
+    │           ├── template.yaml   # required  
+    │           ├── source.tar.gz   # optional   
+    │           ├── patches/        # optional  
+    │           ├── static/         # optional  
+    ├── b/
+    │   └── bash/
+    │       ├── source/             # required
+    │       ├── template.yaml       # required
+    │       ├── source.tar.gz       # optional
+    │       │                           If a url is provided this  will be downloaded
+    │       │ 
+    │       ├── patches/            # optional  
+    │       ├── static/             # optional
+    ├── l/
+    │   └── linux/
+    │       ├── source/             # required
+    │       ├── template.yaml       # required
+    │       ├── source.tar.gz       # optional
+    │       ├── patches/            # optional
+    │       └── config              # optional
 
 # Kernel
 If you desire to have a custom kernel config to enable different hardware 
