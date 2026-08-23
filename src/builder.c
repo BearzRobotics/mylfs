@@ -59,13 +59,41 @@ bool extractTarball(Config cfg, Recipe recipe, short int phase) {
         return true;
     }
 }
+
 // load phase.yaml and grab it
+// This file only has a single int, and doesn't need to use yaml at all.
+// However, to maintain compatiblity i'm leaving the .yaml extension
 short getPhase(Config cfg) {
-    return 0;
+    // generate string for fopen() call
+    char path[4096];
+    snprintf(path, sizeof(path), "%s/recipes/phase.yaml", cfg.buildPath);
+
+    FILE *fp = fopen(path, "r");
+    if (!fp) {
+        perror("fopen");
+    }
+
+    short phase = 0;
+    fscanf(fp, "%hd", &phase);
+
+    fclose(fp);
+    return phase;
 }
 
 // Updates the phase number in the phase.yaml
-bool setPhase(Config cfg) {
+bool setPhase(Config cfg, short phase) {
+    // generate string for fopen() call
+    char path[4096];
+    snprintf(path, sizeof(path), "%s/recipes/phase.yaml", cfg.buildPath);
+
+    FILE *fp = fopen(path, "w");
+    if (!fp) {
+        perror("fopen");
+        return false;
+    }
+
+    fprintf(fp, "%hd", phase);
+    fclose(fp);
     return true;
 }
 

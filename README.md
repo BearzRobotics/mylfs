@@ -2,7 +2,6 @@
 This is inspired by [MyLFS](https://github.com/TheKingKerellos/MyLFS), I forked 
 it to my github and built a fully working x windows stack.
 
-
 If a package fails to download and it's from the linux kernel git site. I had to 
 manually download them first in a browser and then wget worked. -- It's a bot 
 protection mechanism they're using. -- If you download the right version and 
@@ -12,18 +11,16 @@ downloaded.
 https://git.kernel.org
 https://youtu.be/3MTyv7hystI?si=jcm_VvVByv3tWD6Q
 
-
 On the other hand, some packages connect to the internet to download things. 
 If they fail most of the time, restarting them works.
 
-
 # build
-mylfs requires libyaml to be installed on the system and curl in the path.
+mylfs requires libyaml to be installed on the system and curl in the path. CC 
+and CXX are set to clang and clang++ respetivly.
 
 ```sh
     make
 ```
-
 
 ```sh
 sudo ./mylfs
@@ -118,4 +115,3 @@ into zig until that settles.
    * No built in bool value! stdbool.h should not be a requirement to use bool
    * errors as return numbers
    * C switch statements are ugly compared to zig switch or rust match
-   

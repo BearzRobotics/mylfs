@@ -21,7 +21,6 @@
 #include "user.h"
 
 // mounts is an array that holds these paths
-
 void help(void) {
 const char* help_mesg =
     "usage: mylfs\nBy default mylfs will load config.yml to operate\n\n"
@@ -421,7 +420,6 @@ int main(int argc, char* argv[]) {
         header("Phase 5 - Building extra packages per the recipes!");
     }
 
-
     // -----------------------------------------------------------
     // Cleanup
     // -----------------------------------------------------------
@@ -432,7 +430,6 @@ int main(int argc, char* argv[]) {
         passed("User 'lfs' deleted successfully\n");
     }
     
- 
  
     return 0;
 }
