@@ -3,7 +3,9 @@ CC=clang
 CXX=clang++
 
 
-CFLAGS  := -std=c99 -Wall -Wextra -Wpedantic -Wmacro-redefined -Wempty-translation-unit -O2 -g -O0 -Wnopointer-integer-compare
+# These warnings only exist in clang (gcc/musl-gcc reject them as unknown options)
+CLANG_WARN := $(shell $(CC) --version 2>/dev/null | grep -qi clang && echo -Wmacro-redefined -Wempty-translation-unit)
+CFLAGS  := -std=c99 -Wall -Wextra -Wpedantic $(CLANG_WARN) -O2 -g -O0
 LDFLAGS := -static -lyaml
 INCLUDES:= -Iinclude
 

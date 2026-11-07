@@ -46,7 +46,7 @@ const char* help_mesg =
 }
 
 void version(void) {
-    printf("0.0.6\n");
+    printf("0.4.0\n");
 }
 
 
