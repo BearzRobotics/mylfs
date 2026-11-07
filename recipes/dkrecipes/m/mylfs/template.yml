@@ -1,0 +1,33 @@
+name: mylfs
+version: 0.4.0
+release: 1
+url: https://github.com/BearzRobotics/mylfs/releases/download/v0.4.0/mylfs-0.4.0.tar.gz
+homepage: https://github.com/BearzRobotics/mylfs
+
+license: GPL-2.0-only
+summary: Tool for bootstrapping Linux From Scratch systems
+description: |
+  mylfs, the C edition, built fully static against musl so the binary runs on this system and on any other one regardless of libc. The release tarball vendors libyaml, so only musl is needed to build it.
+
+phase: 5
+order: 902
+
+builddeps: [make, musl]
+rundeps: [rsync, tar, unzip, curl]
+
+buildsteps: |
+  # libyaml is vendored in the release tarball. Build it static against musl.
+  tar -xf vendor/yaml-0.2.5.tar.gz -C vendor
+  cd vendor/yaml-0.2.5
+  CC=/musl/bin/musl-gcc \
+  ./configure --prefix=$OLDPWD/vendor/libyaml --disable-shared --enable-static
+  make
+  make install
+  cd -
+
+  make CC=/musl/bin/musl-gcc YAML_PREFIX=$PWD/vendor/libyaml
+
+  install -vDm755 bin/mylfs /usr/local/bin/mylfs
+  install -vDm644 config.yml /usr/share/doc/mylfs/config.yml
+  install -vDm644 README.md /usr/share/doc/mylfs/README.md
+  install -vDm644 doc/mylfs.md /usr/share/doc/mylfs/mylfs.md
