@@ -1,0 +1,27 @@
+name: kmod
+version: 34.2
+release: 1
+url: https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz
+homepage: https://github.com/kmod-project/kmod
+
+license: 
+  - LGPL-2.1-or-later # for libkmod, testsuite and helper libraries
+  - GPL-2.0-or-later  # for tools
+summary: Linux kernel module management utilities
+description: |
+  Linux kernel module management utilities
+  
+phase: 4
+order: 610
+critical: true
+builddeps: [ zlib, xz, zstd ]
+
+buildsteps: |
+  mkdir -p build
+  cd       build
+
+  meson setup --prefix=/usr ..    \
+              --buildtype=release \
+              -D manpages=false
+  ninja
+  ninja install

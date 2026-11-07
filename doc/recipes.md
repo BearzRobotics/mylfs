@@ -1,75 +1,94 @@
-# Recipes Overview
+# Recipes
 
-by default the mylfs will look for a recipes directory in the location it was 
-executed from. This can be configured in the config.yml located in the same dir
-as mylfs was executed from. 
+A recipe is a directory holding a [template.yml](template.md) plus the files the
+package needs. mylfs looks for recipes in `recipes_path` from config.yml (or
+`--recipes-path`), relative to where you run it:
 
 ```console
-$ ls 
-logs mnt recipes/<current recipes> mylfs
+$ ls
+config.yml  logs  mnt  recipes/  mylfs
 ```
 
-In the recipes directory they're a bootstrap directory, [0-9] & [a-z]
+The recipe sets shipped here are `recipes/LFS13_1` (systemd, the default),
+`recipes/LFS12_3`, and `dkrecipes`, a much bigger set that builds a full desktop
+distro.
 
-The bootstrap directory is broken up into the directories phase1, phase2 and 
-phase3. These directories contains the recipes and template.yaml for each phase
-of inital LFS build. “In the first 4 bootstrap phases, the build order is 
-hard-coded. It is recommended to use numbers spaced by 5. (eg. 1, 5, 10, 15, 
-etc) This allows you to go back later and add a package without having to modify
-the order flag of every template.yaml.
+## Layout
 
-The directories [0-9] and [a-z] all contains recipes directories following the 
-template bellow. During phase5 mylfs will create the build order based off from
-the builddeps value. If one of these fail to build the package depending on will
-be skipped. As there is no point in trying to build a package we know cannot be 
-built.
+Inside a recipe set, the directory a recipe lives in is only for your own
+organization. mylfs finds every `template.yml` under the set, and the `phase:`
+key inside decides when it is built. By convention:
 
-There is no way to guarantee that the build order in phase5 will be the same
-each time mylfs is run.
+* `bootstrap/phase1`, `phase2`, `phase3` hold the hard-coded base build
+* `[0-9]` and `[a-z]` hold everything else, by first letter of the name
 
+```
+recipes/LFS13_1/
+├── bootstrap/
+│   └── phase1/
+│       └── gcc/
+│           ├── template.yml    # required
+│           ├── source/         # created by mylfs
+│           ├── gcc-16.2.0.tar.xz   # downloaded from url
+│           ├── patches/        # optional
+│           └── static/         # optional
+├── b/
+│   └── bash/
+│       ├── template.yml
+│       └── bash-5.3.tar.gz
+└── l/
+    └── linux/
+        ├── template.yml
+        └── config          # optional kernel config
+```
 
-# Recipes structure
-recipes/
-├── LFS12_3
-    ├── bootstrap/
-    │   └── phase1/
-    │       └── glibc/
-    │           ├── source/         # required
-    │           │                       If there is no source.tar.gz or other
-    │           │                       supported format this directory must exist 
-    │           │                       as its the default location the builder will 
-    │           │                       enter.
-    │           ├── template.yaml   # required  
-    │           ├── source.tar.gz   # optional   
-    │           ├── patches/        # optional  
-    │           ├── static/         # optional  
-    ├── b/
-    │   └── bash/
-    │       ├── source/             # required
-    │       ├── template.yaml       # required
-    │       ├── source.tar.gz       # optional
-    │       │                           If a url is provided this  will be downloaded
-    │       │ 
-    │       ├── patches/            # optional  
-    │       ├── static/             # optional
-    ├── l/
-    │   └── linux/
-    │       ├── source/             # required
-    │       ├── template.yaml       # required
-    │       ├── source.tar.gz       # optional
-    │       ├── patches/            # optional
-    │       └── config              # optional
+| Entry | Meaning |
+|-------|---------|
+| `template.yml` | Required. Describes and builds the package. |
+| `<tarball>` | The file(s) from `url`. Downloaded on first run, or put there by hand. |
+| `source/` | Where the first tarball is extracted and where the buildsteps start. Created by mylfs and deleted after a good build unless `cleanup: false`. |
+| `patches/` | Optional. Patch files for the buildsteps, used as `patch -Np1 -i ../patches/x.patch`. |
+| `static/` | Optional. Files to install as-is (configs, unit files). A recipe with no `url` starts its buildsteps here. |
+| `config` | Optional. Used by the linux recipe, see Kernel below. |
 
-# Kernel
-If you desire to have a custom kernel config to enable different hardware 
-support you can. First extract the kernel source code for the version you desire
-to build. Run the following command to configure the kernel and make sure to 
-save to generate a .config file.
+Because the buildsteps start in `source/`, the recipe directory is `..` from
+there: `../patches/`, `../static/` and extra tarballs are all reached that way.
+
+## Ordering
+
+* **Phases 1-4** build in the order given by `order:`, lowest first. Use numbers
+  spaced by 5 so you can add a package without renumbering. These phases are
+  the base LFS build.
+* **Phase 5** is sorted from `builddeps:`. The order can differ between runs
+  where packages are independent of each other.
+
+In phase 5 a recipe is skipped when it is already built (recorded in
+`recipes/build_state.db` inside the build dir) or when one of its builddeps
+failed or has no recipe. A package that cannot build is not retried by
+whatever depended on it. See [phases.md](phases.md) for details.
+
+## Kernel
+
+To build the kernel with your own config, extract the kernel source for the
+version you want and run:
+
 ```sh
 make menuconfig
 ```
 
-Once you've completed generating your config, copy it into the l/linux folder as 
-config without the dot. The default recipe we check if it exist. If it does it
-will copy it over in place and build the kernel with it. Otherwise the kernel 
-build with a minimal defconfig.
+Save, then copy the resulting `.config` into the linux recipe directory
+(`l/linux/`) as `config`, without the dot. The linux recipe copies it into
+place and runs `make olddefconfig` if the file exists, otherwise it builds a
+minimal `defconfig`.
+
+## Adding a recipe
+
+1. Make `<recipes>/<first letter>/<name>/template.yml`
+   (start from [template.yml](template.yml)).
+2. Set `phase: 5` for something that goes on top of the base system.
+3. List what it needs in `builddeps`.
+4. Run `sudo ./mylfs --start-phase 5 --start-package <name>` to build just it
+   and its dependencies.
+
+Downloads that fail because a site blocks bots (git.kernel.org) can be fetched
+in a browser and dropped into the recipe directory, mylfs will use them.

@@ -1,16 +1,24 @@
-name:
-version:
-release:
-url:
+# Copy this to <recipes>/<letter>/<name>/template.yml
+# See doc/template.md for what each key does.
+
+name:                   # required
+version:                # required
+release: 1              # bump to force a rebuild (phase 5)
+url:                    # string or list. The first one is extracted into source/
 homepage:
 
 license:
 summary:
 description: |
 
-phase:               
+phase:                  # 1-5
 order:                  # phase 1-4 only
-critical: true
-builddeps:     []       # if need
+critical: false         # true stops the build if this fails
+cleanup: true           # false keeps the extracted source/
+builddeps: []           # phase 5 ordering; phase 4 recipes with these are rebuilt in 5
+rundeps: []             # phase 5
 
 buildsteps: |
+    ./configure --prefix=/usr
+    make
+    make install

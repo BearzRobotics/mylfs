@@ -1,0 +1,41 @@
+name: python
+version: 3.14.7
+release: 1
+url: https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz
+homepage: https://www.python.org/
+
+license: PSF License
+summary: General purpose cross platform scripting language
+
+phase: 4
+order: 540
+critical: true
+builddeps: [ libffi, openssl, zlib ]
+
+buildsteps: |
+  # added --with-ensurepip=yes \
+
+  patch -Np1 -i ../patches/Python-3.14.7-openssl_4-1.patch
+
+  ./configure --prefix=/usr        \
+              --enable-shared      \
+              --with-system-expat  \
+              --with-ensurepip=yes \
+              --enable-optimizations \
+              --without-static-libpython
+
+  make
+  
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make test TESTOPTS="--timeout 120"
+      set -e
+  fi
+
+  make install
+
+  cat > /etc/pip.conf << EOF
+  [global]
+  root-user-action = ignore
+  disable-pip-version-check = true
+  EOF

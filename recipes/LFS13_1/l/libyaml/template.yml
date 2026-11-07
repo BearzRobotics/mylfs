@@ -1,0 +1,29 @@
+name: libyaml
+version: 0.2.5
+release: 1
+url: https://pyyaml.org/download/libyaml/yaml-0.2.5.tar.gz
+homepage: https://pyyaml.org/wiki/LibYAML
+
+license: MIT
+summary: YAML 1.1 parser and emitter written in C
+description: |
+  LibYAML is a C library for parsing and emitting YAML. This is the static build against musl (installed in /usr/local/musl) that mylfs links against.
+
+phase: 5
+order: 901
+
+builddeps: [musl]
+
+buildsteps: |
+  CC=/usr/local/musl/bin/musl-gcc \
+  ./configure --prefix=/usr/local/musl --disable-shared --enable-static
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install

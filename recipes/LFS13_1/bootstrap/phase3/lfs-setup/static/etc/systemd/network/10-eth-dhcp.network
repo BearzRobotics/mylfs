@@ -1,0 +1,8 @@
+[Match]
+Name=en* eth*
+
+[Network]
+DHCP=ipv4
+
+[DHCPv4]
+UseDomains=true

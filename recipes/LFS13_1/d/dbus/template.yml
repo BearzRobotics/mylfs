@@ -1,0 +1,32 @@
+name: dbus
+version: 1.16.2
+release: 1
+url: https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz
+homepage: https://www.freedesktop.org/wiki/Software/dbus
+
+license: AFL-2.1 OR GPL-2.0-or-later
+summary: Message bus system
+description: |
+  D-Bus is a message bus system, a simple way for applications to talk to one another. D-Bus supplies both a system daemon (for events such as "new hardware device added" or "printer queue changed") and a per-user-login-session daemon (for general IPC needs among user applications).
+
+phase: 4
+order: 790
+critical: true
+
+buildsteps: |
+  mkdir build
+  cd    build
+
+  meson setup --prefix=/usr --buildtype=release --wrap-mode=nofallback ..
+
+  ninja
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      ninja test
+      set -e
+  fi
+
+  ninja install
+
+  ln -sfv /etc/machine-id /var/lib/dbus

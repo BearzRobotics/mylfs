@@ -1,0 +1,21 @@
+name: dosfstools
+version: 4.2
+release: 1
+url: https://github.com/dosfstools/dosfstools/releases/download/v4.2/dosfstools-4.2.tar.gz
+homepage: https://github.com/dosfstools/dosfstools
+
+license: GPL-3.0-or-later
+summary: Tools for creating and checking FAT filesystems
+description: |
+  dosfstools contains mkfs.fat and fsck.fat for creating and checking MS-DOS FAT file systems. It's used to format USB drives or partitions with FAT16/FAT32.
+
+phase: 5
+builddeps: [glibc, make]
+
+buildsteps: |
+  ./configure --prefix=/usr            \
+            --enable-compat-symlinks \
+            --mandir=/usr/share/man  \
+            --docdir=/usr/share/doc/dosfstools-{version} &&
+  make
+  make install

@@ -1,0 +1,9 @@
+File systems --->
+  <*/M> FUSE (Filesystem in Userspace) support                         [FUSE_FS]
+
+
+  If you want to run test 
+
+File systems --->
+  <*/M> FUSE (Filesystem in Userspace) support                         [FUSE_FS]
+  <*/M>   Character device in Userspace support                           [CUSE]

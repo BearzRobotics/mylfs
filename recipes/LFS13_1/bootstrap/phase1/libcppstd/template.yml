@@ -1,0 +1,38 @@
+name: libcppstd
+version: 16.2.0
+release: 1
+
+homepage: https://gcc.gnu.org/
+
+license: GPL-3.0-or-later WITH GCC-exception-3.1
+summary: stub of libcppstd
+phase: 1
+order: 6
+critical: true
+
+
+buildsteps: |
+    
+    ls ../../gcc 
+    cd ../../gcc/source
+
+    mkdir -vp build-libstdc++
+    cd build-libstdc++
+
+        ../libstdc++-v3/configure \
+            --host=$LFS_TGT                     \
+            --build=$(../config.guess)          \
+            --prefix=/usr                       \
+            --disable-multilib                  \
+            --disable-nls                       \
+            --disable-libstdcxx-pch             \
+            --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/{version}
+
+        make
+        make DESTDIR=$LFS install
+
+        rm -v $LFS/usr/lib/lib{stdc++{,exp,fs},supc++}.la
+
+        cd ../..
+        rm -rf source
+

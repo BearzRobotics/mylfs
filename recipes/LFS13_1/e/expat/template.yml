@@ -1,0 +1,32 @@
+name: expat
+version: 2.8.3
+release: 1
+url: https://github.com/libexpat/libexpat/releases/download/R_2_8_3/expat-2.8.3.tar.xz
+homepage: https://libexpat.github.io/
+
+license: MIT
+summary: XML Parsing Library
+description: |
+  The Expat package contains a stream oriented C library for parsing XML.
+  
+phase: 4
+order: 430
+critical: true
+
+#builddeps: [make, glibc]
+
+buildsteps: |
+  ./configure --prefix=/usr    \
+              --disable-static \
+              --docdir=/usr/share/doc/expat-{version}
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+
+  install -m644 doc/*.{html,css} /usr/share/doc/expat-{version}

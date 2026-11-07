@@ -1,0 +1,7 @@
+NAME="HolyFenrir's Linux From Scratch"
+VERSION="13.1-systemd"
+ID=lfs
+PRETTY_NAME="Linux From Scratch 13.1-systemd"
+VERSION_CODENAME=lfs
+HOME_URL="https://www.linuxfromscratch.org/lfs/"
+RELEASE_TYPE="stable"

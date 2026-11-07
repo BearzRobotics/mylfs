@@ -1,43 +1,44 @@
 # Phases
-The phase in this program are meant to mimic the phases during a typicall LFS 
-build session. However, there is nothing special to them. If the occosiated 
-files exist as described in recipes.md they will be ran. 
 
-In theory one could change the recipes to support build a LFS system with 
-clang + musl without needing to modify the code to mylfs at all. Merely the
-phase headers may not match up what is actually being done under the hood.
+The phases mimic the stages of a normal LFS build, but nothing in mylfs is
+specific to them. A recipe is built in whichever phase its `phase:` says, so in
+theory the same program can build a clang + musl system by only changing the
+recipes. The phase names below may then not match what is actually happening.
 
+| Phase | Name | Runs | Environment |
+|-------|------|------|-------------|
+| 1 | Cross toolchain | on the host as `lfs` | `$LFS`, `$LFS_TGT`, `$LFS/tools/bin` first in PATH |
+| 2 | Temporary tools | on the host as `lfs` | same as phase 1 |
+| 3 | Temporary system | in the chroot as root | first entry into the chroot |
+| 4 | Base LFS system | in the chroot as root | |
+| 5 | Extra packages | in the chroot as root | everything beyond the base system |
 
-# Phases discriptions 
+`$MAKEFLAGS` is not passed in phases 1 and 2. See
+[template.md](template.md#variables-available-to-buildsteps).
 
-Phase 1:
-   Cross toolchain
+## Failure handling
 
-Phase 2:
-   Temp tools /tools
+* Phases 1 and 2 stop at the first failure.
+* Phases 3 and 4 stop on a package marked `critical: true`, otherwise they log
+  the failure and continue.
+* Phase 5 never stops. A failed recipe is reported, and any recipe that needs it
+  is shown as `[SKIP]`.
 
-Phase 3:
-   (Entering chroot for first time)
-   Temp system
+## Phase 5 and the rebuild of phase 4
 
-Phase 4:
-   This phase builds the base LFS system. 
+Phase 4 is ordered by `order:`, phase 5 by `builddeps`. In phase 5 a recipe is skipped when:
 
-Phase 5
-   As described in recipes.md this phase will build all user add recipes beyond
-   the base system. These recipes are located in recipes/[0-9] or [a-z].
+* it is already built (recorded in `recipes/build_state.db`)
+* one of its builddeps failed or has no recipe
 
-   If a recipe fails to build it will merely move on. If another recipe relys on
-   a recipe that failed to build it will be marked as [skip] at the prompt. 
+Raising the `release:` of a built recipe rebuilds it and everything that
+builddeps on it. Phase 4 recipes with no builddeps are recorded as built when
+phase 4 finishes. The ones with builddeps are rebuilt in phase 5, so optional
+features that need extra libraries get enabled.
 
-   Any phase 4 recipe with a builddeps: option listed will be rebuilt in
-   phase 5. As some packages can have optional build deps that enable more
-   features if they're present at build time.
+## Resuming
 
-   Recipes in phase 4 and 5 are ordered by their builddeps. A recipe is
-   skipped when:
-      - it is already built (recorded in recipes/build_state.db)
-      - one of its builddeps failed or has no recipe
-   Raising the release: of a built recipe rebuilds it and everything that
-   builddeps on it. Phase 4 recipes that have no builddeps are recorded as
-   built when phase 4 finishes. The ones with builddeps are rebuilt here.
+A plain run starts at phase 1. Use `--start-phase <1-5>` to resume, and
+`--start-package <name>...` to start at a package. In phases 1-4 the build
+continues from the named package. In phase 5 only the named packages plus their
+builddeps and rundeps are built. See [mylfs.md](mylfs.md).

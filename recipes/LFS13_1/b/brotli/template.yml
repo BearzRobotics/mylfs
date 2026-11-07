@@ -1,0 +1,35 @@
+name: brotli
+version: 1.2.0
+release: 1
+url: https://github.com/google/brotli/archive/v1.2.0/brotli-1.2.0.tar.gz
+homepage: https://github.com/google/brotli
+
+license: 
+summary:  Brotli provides a general-purpose lossless compression algorithm that compresses data using a combination of a modern variant of the LZ77 algorithm, Huffman coding and 2nd order context modeling. Its libraries are particularly used for WOFF2 fonts on webpages.
+description: |
+    Brotli provides a general-purpose lossless compression algorithm that compresses data using a combination of a modern variant of the LZ77 algorithm, Huffman coding and 2nd order context modeling. Its libraries are particularly used for WOFF2 fonts on webpages.
+phase: 5
+
+
+builddeps: [make, glibc, cmake]
+
+buildsteps: |
+  mkdir build &&
+  cd    build &&
+
+  cmake -D CMAKE_INSTALL_PREFIX=/usr \
+        -D CMAKE_BUILD_TYPE=Release  \
+        -G Ninja .. &&
+  ninja
+  ninja install
+
+  cd .. &&
+
+  sed -e '/libraries +=/s/=.*/= [required_system_library[3:]]/' \
+      -e '/package_configuration/d'                             \
+      -e '/pkgconfig/d'                                         \
+      -i setup.py                                               &&
+
+  USE_SYSTEM_BROTLI=1 \
+  pip3 wheel -w dist --no-build-isolation --no-deps --no-cache-dir $PWD
+  pip3 install --no-index --find-links dist --no-user Brotli

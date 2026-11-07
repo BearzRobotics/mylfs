@@ -23,8 +23,8 @@ keep_logs: true
 build_path: "/mnt/lfs"
 
 # path to recipes dir
-# default is recipes_path: "recipes/LFS12_3"
-recipes_path: "recipes/LFS12_3"
+# default is recipes_path: "recipes/LFS13_1"
+recipes_path: "recipes/LFS13_1"
 
 # only build the base system phase 1-4
 bootstrap_only: false
@@ -45,7 +45,7 @@ RUSTFLAGS: ""
 
 version_check: |
   #!/bin/bash
-  # This script came from LFS 12.3
+  # This script came from LFS 13.1
   # A script to list version numbers of critical development tools
   # If you have tools installed in other directories, adjust PATH here AND
   # in ~lfs/.bashrc (section 4.4) as well.

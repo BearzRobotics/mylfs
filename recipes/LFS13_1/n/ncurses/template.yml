@@ -1,0 +1,41 @@
+name: ncurses
+version: 6.6
+release: 1 
+url: https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz
+homepage: https://www.gnu.org/software/ncurses/
+
+license: X11 License
+summary: The ncurses library routines are a terminal-independent method of updating character screens with reasonable optimization.
+description: |
+  The ncurses library routines are a terminal-independent method of updating character screens with reasonable optimization. This package contains the shared libraries necessary to run programs compiled with ncurses.
+
+phase: 4
+order: 330
+critical: true
+
+buildsteps: |
+ ./configure --prefix=/usr           \
+            --mandir=/usr/share/man \
+            --with-shared           \
+            --without-debug         \
+            --without-normal        \
+            --with-cxx-shared       \
+            --enable-pc-files       \
+            --with-pkg-config-libdir=/usr/lib/pkgconfig
+
+  make
+
+  make DESTDIR=$PWD/dest install
+  sed -e 's/^#if.*XOPEN.*$/#if 1/' \
+      -i dest/usr/include/curses.h
+  cp --remove-destination -a dest/* /
+
+  for lib in ncurses form panel menu ; do
+      ln -sf lib${lib}w.so /usr/lib/lib${lib}.so
+      ln -sf ${lib}w.pc    /usr/lib/pkgconfig/${lib}.pc
+  done
+
+  ln -sf libncursesw.so /usr/lib/libcurses.so
+
+  cp -R doc -T /usr/share/doc/ncurses-6.6
+

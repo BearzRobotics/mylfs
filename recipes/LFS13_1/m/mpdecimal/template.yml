@@ -1,0 +1,29 @@
+name: mpdecimal
+version: 4.0.1
+release: 1
+url: https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-4.0.1.tar.gz
+homepage: https://www.bytereef.org/mpdecimal/
+
+license: BSD-2-Clause
+summary: Fast C/C++ libraries for correctly-rounded arbitrary precision decimal floating point arithmetic
+description: |
+  The mpdecimal package contains fast C/C++ libraries for correctly-rounded arbitrary precision decimal floating point arithmetic.
+
+phase: 4
+order: 530
+critical: true
+
+buildsteps: |
+  ./configure --prefix=/usr    \
+              --disable-static \
+              --docdir=/usr/share/doc/mpdecimal-{version}
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check_local
+      set -e
+  fi
+
+  make install

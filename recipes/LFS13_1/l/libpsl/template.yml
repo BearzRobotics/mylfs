@@ -1,0 +1,24 @@
+name: libpsl
+version: 0.23.3
+release: 1
+url: https://github.com/rockdaboot/libpsl/releases/download/0.23.3/libpsl-0.23.3.tar.gz
+homepage: https://github.com/rockdaboot/libpsl
+
+license: MIT
+summary: Library for Public Suffix List
+description: |
+  libpsl is a C library for the Public Suffix List, used to determine the domain name hierarchy.
+
+phase: 5
+buildsystem: make
+builddeps: [libidn2]
+
+buildsteps: |
+  mkdir build &&
+  cd    build &&
+
+  meson setup --prefix=/usr --buildtype=release .. &&
+
+  ninja
+
+  ninja install

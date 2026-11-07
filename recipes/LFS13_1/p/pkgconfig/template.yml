@@ -1,0 +1,40 @@
+name: pkgconfig
+version: 3.0.5
+release: 1
+url:
+  - https://distfiles.ariadne.space/pkgconf/pkgconf-3.0.5.tar.xz
+  - https://github.com/mesonbuild/meson/releases/download/1.12.0/meson-1.12.0.tar.gz
+homepage: https://github.com/pkgconf/pkgconf
+
+license: ISC
+summary: Package compiler and linker metadata toolkit
+description: |
+  Package compiler and linker metadata toolkit
+  
+phase: 4
+order: 210
+critical: true
+
+buildsteps: |
+  # work around a circular dependency on meson
+  tar -xf ../meson-1.12.0.tar.gz
+
+  mkdir build
+  cd    build
+
+  python3 ../meson-1.12.0/meson.py setup --prefix=/usr --buildtype=release ..
+
+  ninja
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      ninja test
+      set -e
+  fi
+
+  ninja install
+
+  mv /usr/share/doc/pkgconf{,-{version}}
+
+  ln -sv pkgconf   /usr/bin/pkg-config
+  ln -sv pkgconf.1 /usr/share/man/man1/pkg-config.1

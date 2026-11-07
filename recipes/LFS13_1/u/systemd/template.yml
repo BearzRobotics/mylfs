@@ -1,0 +1,63 @@
+name: systemd
+version: 261.2
+release: 1
+url:
+  - https://github.com/systemd/systemd/archive/v261.2/systemd-261.2.tar.gz
+  - https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-261.2.tar.xz
+
+homepage: https://systemd.io
+
+license: LGPL-2.1-or-later AND GPL-2.0-or-later
+summary: System and service manager (also provides udev)
+description: |
+  The systemd package contains programs for controlling the startup, running, and shutdown of the system.
+
+phase: 4
+order: 780
+critical: true
+
+buildsteps: |
+  sed -e 's/GROUP="render"/GROUP="video"/' \
+      -e 's/GROUP="sgx", //'               \
+      -i rules.d/50-udev-default.rules.in
+
+  mkdir -p build
+  cd       build
+
+  meson setup ..                \
+        --prefix=/usr           \
+        --buildtype=release     \
+        -D default-dnssec=no    \
+        -D firstboot=false      \
+        -D install-tests=false  \
+        -D ldconfig=false       \
+        -D sysusers=false       \
+        -D rpmmacrosdir=no      \
+        -D homed=disabled       \
+        -D man=disabled         \
+        -D mode=release         \
+        -D pamconfdir=no        \
+        -D dev-kvm-mode=0660    \
+        -D nobody-group=nogroup \
+        -D sysupdate=disabled   \
+        -D ukify=disabled       \
+        -D docdir=/usr/share/doc/systemd-{version}
+
+  ninja
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      [ -e /etc/os-release ] || echo 'NAME="Linux From Scratch"' > /etc/os-release
+      unshare -m ninja test
+      set -e
+  fi
+
+  ninja install
+
+  tar -xf ../../systemd-man-pages-{version}.tar.xz \
+      --no-same-owner --strip-components=1         \
+      -C /usr/share/man
+
+  systemd-machine-id-setup
+
+  systemctl preset-all

@@ -1,0 +1,31 @@
+name: grub2
+version: 1.23.0
+release: 1
+url: https://ftp.gnu.org/gnu/grub/grub-2.14.tar.xz
+
+homepage: https://www.gnu.org/software/grub/
+
+license: 
+  - GPL-3.0-or-later # for included terminus fonts in redistributable BDF format
+  - OFL-1.1
+summary:  GRUB Boot Loader
+description: |
+  GRUB Boot Loader
+phase: 4
+order: 660
+critical: true
+
+buildsteps: |
+  sed 's/--image-base/--nonexist-linker-option/' -i configure
+
+  ./configure --prefix=/usr          \
+              --sysconfdir=/etc      \
+              --disable-efiemu       \
+              --disable-werror
+
+  make
+
+  make install
+  if [ -f /etc/bash_completion.d/grub ]; then
+    mv /etc/bash_completion.d/grub /usr/share/bash-completion/completions
+  fi

@@ -1,0 +1,4 @@
+# file system      mount-point               type      options             dump  fsck
+#                                                                                order
+
+LABEL={lfs_rootlabel} /                        $LFSFSTYPE defaults             1   1

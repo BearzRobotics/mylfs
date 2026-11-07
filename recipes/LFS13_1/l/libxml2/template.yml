@@ -1,0 +1,33 @@
+name: libxml2
+version: 2.15.3
+release: 1
+url: https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.3.tar.xz
+homepage: https://www.w3.org/
+
+license: MIT
+summary: International Components for Unicode
+description: |
+    The International Components for Unicode (ICU) package is a mature, widely used set of C/C++
+    libraries providing Unicode and Globalization support for software applications. ICU is widely
+    portable and gives applications the same results on all platforms.
+phase: 5
+
+
+builddeps: [make, glibc, icu]
+
+buildsteps: |
+  sed -i "/'git'/,+3d" meson.build
+
+  mkdir build &&
+  cd    build &&
+
+  meson setup ..            \
+        --prefix=/usr       \
+        --buildtype=release \
+        -D history=enabled  \
+        -D icu=enabled      &&
+  ninja
+
+  ninja install
+
+  sed "s/--static/--shared/" -i /usr/bin/xml2-config

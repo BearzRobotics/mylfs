@@ -14,11 +14,17 @@ order: 3
 critical: true
 
 buildsteps: |
+  # bash 5.2.37 still uses K&R-style declarations (e.g. `void file_error ();`).
+  # While cross compiling, builtins/mkbuiltins.c is built with the HOST gcc, and
+  # GCC 15+ defaults to C23 where `()` means `(void)`, so it fails with
+  # "too many arguments to function 'xmalloc'". Force the host helper to C17.
+  # Not needed for bash 5.3+ (LFS 13.1).
   ./configure --prefix=/usr                      \
               --build=$(sh support/config.guess) \
               --host=$LFS_TGT                    \
               --without-bash-malloc              \
-              bash_cv_strtold_broken=no
+              bash_cv_strtold_broken=no          \
+              CC_FOR_BUILD='gcc -std=gnu17'
 
   make
   make DESTDIR=$LFS install

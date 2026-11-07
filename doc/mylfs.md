@@ -3,10 +3,15 @@
 
 # SYNOPSIS
         ```sh
-        mylfs
+        mylfs [OPTIONS]
         ```
 # DESCRIPTION
-        If you ever built 
+        mylfs builds a Linux From Scratch system from a directory of recipes
+        (see recipes.md and template.md). It runs five phases: cross toolchain,
+        temporary tools, temporary system, the base system, and then any extra
+        packages (see phases.md). It must be run as root, since it creates the
+        lfs user, mounts filesystems and chroots.
+
 
 # OPTIONS
         --bootstrap
@@ -76,7 +81,7 @@
             - Non‑zero on error
 
 # ENVIRONMENT
-        <List any environment variables that affect the utility’s behavior, if applicable.>
+        None. Everything is configured with config.yml and the command line.
 
 # FILES
         mylfs can be configured with a config.yml in the same direcotry as 
@@ -144,4 +149,4 @@
         Misc: <Anything else you feel is important>
 
 # SEE ALSO
-        <List related man pages, docs, or resources, e.g., other utilities or standards.>
+        recipes.md, template.md, phases.md, installation.md

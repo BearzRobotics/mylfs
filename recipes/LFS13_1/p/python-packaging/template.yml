@@ -1,0 +1,20 @@
+name: python-packaging
+version: 26.3
+release: 1
+url: https://files.pythonhosted.org/packages/source/p/packaging/packaging-26.3.tar.gz
+homepage: https://pypi.org/project/packaging/
+
+license: Apache-2.0 OR BSD-2-Clause
+summary: Core utilities for Python packages
+description: |
+  The packaging module is a Python library that provides utilities that implement the interoperability specifications which have clearly one correct behaviour (PEP440) or benefit greatly from having a single shared implementation (PEP425). This includes utilities for version handling, specifiers, markers, tags, and requirements.
+
+phase: 4
+order: 570
+critical: true
+
+builddeps: [ python-flitcore ]
+
+buildsteps: |
+  pip3 wheel -w dist --no-cache-dir --no-build-isolation --no-deps $PWD
+  pip3 install --no-index --find-links dist packaging
