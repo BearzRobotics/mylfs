@@ -1,0 +1,39 @@
+name: libxml2
+version: 2.14.1
+release: 1
+url: https://download.gnome.org/sources/libxml2/2.14/libxml2-2.14.1.tar.xz
+homepage: https://www.w3.org/
+license: MIT
+summary: International Components for Unicode
+description: |
+  The International Components for Unicode (ICU) package is a mature, widely used set of C/C++
+  libraries providing Unicode and Globalization support for software applications. ICU is widely
+  portable and gives applications the same results on all platforms.
+#phase: 2
+#order: 30
+# technically python is a dep of this. -- It is built in phase 4 
+# so this command will work. However, here it's creating a cyclical chain 
+# breaking my DAG graph
+builddeps: [make, glibc, icu, python3]
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export LD_LIBRARY_PATH="$LFS/lib:$LFS/usr/lib:$LFS/usr/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+
+  ./configure --prefix=$LFS/usr           \
+              --sysconfdir=/etc       \
+              --with-history          \
+              --with-icu              \
+              PYTHON=$LFS/usr/bin/python3 \
+              --docdir=$LFS/usr/share/doc/libxml2-{version} \
+              --host=x86_64-linux-musl
+  make
+
+  make install
+
+  rm -vf $LFS/usr/lib/libxml2.la &&
+  sed '/libs=/s/xml2.*/xml2"/' -i $LFS/usr/bin/xml2-config

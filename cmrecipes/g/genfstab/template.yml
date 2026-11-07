@@ -1,0 +1,19 @@
+# This is based on his genfstab script. 
+name: genfstab
+version: 2.41.0
+release: 1
+homepage: https://github.com/cemkeylan/genfstab
+
+license: The MIT License (MIT)
+summary: A script to help generate fstabs
+description: |
+     A script to help generate fstabs
+
+phase: 4
+order: 426
+critical: true
+
+
+buildsteps: |
+  cp -rfv genfstab /usr/bin/genfstab
+  chmod +x /usr/bin/genfstab

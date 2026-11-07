@@ -1,0 +1,23 @@
+name: grep
+version: 3.11
+release: 1
+url: https://ftp.gnu.org/gnu/grep/grep-3.11.tar.xz
+homepage: https://www.gnu.org/software/grep/
+
+license: GPL-3.0-or-later
+summary: grep (pattern searching tool)
+description: |
+  grep stands for global / regular expression / print, and is used to search for patterns and strings within text files.
+
+phase: 2
+order: 9
+critical: true
+
+buildsteps: |
+  export CFLAGS="-std=gnu99 -Wno-old-style-definition -static -I$LFS/usr/include -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -Wno-error=implicit-function-declaration"
+  
+  ./configure --prefix=/usr   \
+              --host=$LFS_TGT \
+              --build=$(./build-aux/config.guess)
+  make
+  make DESTDIR=$LFS install

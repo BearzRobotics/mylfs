@@ -16,3 +16,9 @@ buildsteps: |
   meson setup build --prefix=/usr
   meson compile -C build
   meson install -C build
+
+  getent group seat >/dev/null || groupadd -g 486 seat
+
+  install -m644 ../static/seatd /etc/init.d/seatd
+  chmod +x /etc/init.d/seatd
+

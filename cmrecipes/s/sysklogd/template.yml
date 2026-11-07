@@ -1,0 +1,23 @@
+name: sysklogd
+version: 2.7.0
+release: 1
+url: https://github.com/troglobit/sysklogd/releases/download/v2.7.0/sysklogd-2.7.0.tar.gz
+homepage: https://www.infodrom.org/projects/sysklogd/
+
+license: GPL-2.0-or-later
+summary: Tools for logging 
+description: |
+  The Sysklogd package contains programs for logging system messages, such as those emitted by the kernel when unusual things happen.
+phase: 4
+order: 410
+critical: true
+
+buildsteps: |
+  ./configure --prefix=/usr      \
+              --sysconfdir=/etc  \
+              --runstatedir=/run \
+              --without-logger
+
+  make
+
+  make install

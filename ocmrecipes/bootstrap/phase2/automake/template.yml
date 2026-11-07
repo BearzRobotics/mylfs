@@ -1,0 +1,31 @@
+name: automake
+version: 1.17
+release: 1
+url: https://ftp.gnu.org/gnu/automake/automake-1.17.tar.xz
+homepage: https://www.gnu.org/software/automake/
+license: GPL-2.0-or-later
+summary: Automake is a tool for automatically generating `Makefile.in' files compliant with the GNU Coding Standards
+description: |
+  Automake is a tool for automatically generating `Makefile.in' files compliant with the GNU Coding Standards
+phase: 2
+order: 27
+critical: true
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  ./configure --prefix=$LFS/usr --docdir=$LFS/usr/share/doc/automake-{version} --host=x86_64-linux-musl
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make -j$(($(nproc)>4?$(nproc):4)) check
+      set -e
+  fi
+
+  make install
+builddeps: []

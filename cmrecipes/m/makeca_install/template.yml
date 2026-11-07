@@ -1,0 +1,18 @@
+name: makeca_install
+version: 1.15
+release: 1
+url: https://github.com/lfs-book/make-ca/archive/v1.15/make-ca-1.15.tar.gz
+homepage: https://github.com/lfs-book/make-ca
+
+license: MIT
+summary: Simple CA certificate management
+description: |
+  make-ca is a utility to manage and generate a consolidated list of Certificate Authorities (CAs) for use with SSL/TLS.
+
+phase: 5
+buildsystem: make
+builddeps: [p11kit]
+
+buildsteps: |
+  make install
+  install -dm755 /etc/ssl/local

@@ -1,0 +1,30 @@
+name: findutils
+version: 4.10.0
+release: 1
+url: https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz
+homepage: https://www.gnu.org/software/findutils/
+
+license: GPL-3.0-or-later
+summary: findutils (basic directory searching utilities)
+description: |
+  findutils are basic directory searching tools and are often used with other programs for directory search and file locating.
+
+phase: 4
+order: 305
+critical: true
+
+#builddeps: [make, glibc]
+
+buildsteps: |
+  ./configure --prefix=/usr --localstatedir=/var/lib/locate
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      chown -R tester .
+      su tester -c "PATH=$PATH make check"
+      set -e
+  fi
+
+  make install

@@ -1,0 +1,36 @@
+name: openssl
+version: 3.4.1
+release: 1
+url: https://github.com/openssl/openssl/releases/download/openssl-3.4.1/openssl-3.4.1.tar.gz
+homepage: https://www.openssl-library.org/
+
+license: 
+summary: 
+description: |
+
+phase: 4
+order: 230
+critical: true
+builddeps: [ perl ]
+
+buildsteps: |
+  ./config --prefix=/usr         \
+          --openssldir=/etc/ssl \
+          --libdir=lib          \
+          shared                \
+          zlib-dynamic
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      HARNESS_JOBS=$(nproc) make test
+      set -e
+  fi
+
+  sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+  make MANSUFFIX=ssl install
+
+  mv /usr/share/doc/openssl /usr/share/doc/openssl-{version}
+
+  cp -fr doc/* /usr/share/doc/openssl-{version}

@@ -1,0 +1,19 @@
+name: waybar
+version: 0.12.0
+release: 1
+url: https://github.com/Alexays/Waybar/archive/refs/tags/0.12.0.tar.gz
+homepage: https://github.com/Alexays/Waybar
+license: MIT
+summary: Highly customizable Wayland bar for Sway and Hyprland
+description: |
+  Waybar is a minimal and highly customizable bar for Wayland compositors 
+  such as Sway and Hyprland. It supports modules for network, battery, 
+  CPU usage, system tray, and more.
+
+phase: 5
+builddeps: [gtk3, jsoncpp, libinput, wayland cairo, pango, glibc, meson, ninja]
+
+buildsteps: |
+  meson setup build --prefix=/usr
+  ninja -C build
+  ninja -C build install

@@ -1,0 +1,43 @@
+name: python3
+version: 3.13.2
+release: 1
+url: https://www.python.org/ftp/python/3.13.2/Python-3.13.2.tar.xz
+homepage: https://www.python.org/
+
+license: PSF License
+summary: General purpose cross platform scripting language
+
+phase: 3
+order: 40
+critical: true
+builddeps: [ libffi, openssl, zlib ]
+
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"    
+  
+  # added --with-ensurepip=yes \
+
+  ac_cv_file__dev_ptmx=yes ac_cv_file__dev_ptc=no ./configure --prefix=$LFS/usr --disable-ipv6 --enable-shared --with-system-expat --with-ensurepip=yes --enable-optimizations --build=x86_64-pc-linux-gnu --host=x86_64-pc-linux-musl --with-build-python    
+
+              #--without-bzip2
+
+  make
+  
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make test TESTOPTS="--timeout 120"
+      set -e
+  fi
+
+  make install
+
+  cat > $LFS/etc/pip.conf << EOF
+  [global]
+  root-user-action = ignore
+  disable-pip-version-check = true
+  EOF

@@ -1,0 +1,96 @@
+name: llvm-runtimes
+version: 17.0.9        # Example LLVM release, adjust as needed
+release: 1
+url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-21.1.8.tar.gz
+homepage: https://llvm.org/
+
+license: Apache-2.0
+summary: LLVM binutils-equivalents (ar, ranlib, strip, nm, linker)
+description: |
+  LLVM provides replacements for GNU binutils tools including llvm-ar, llvm-ranlib, llvm-strip, llvm-nm, and the LLD linker.
+  These tools can be used with clang to build a complete system without GNU binutils.
+
+phase: 2
+order: 115
+
+buildsteps: |
+  # Set up sysroot for musl
+  export CC="clang"
+  export CXX="clang++"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export CFLAGS="--sysroot=$LFS -I$LFS/usr/include -static"
+  export CXXFLAGS="--sysroot=$LFS -I$LFS/usr/include"
+  export PM=$(grep -c processor /proc/cpuinfo)
+
+  mkdir -pv $LFS/usr/include/compat/
+  cp -apvr ../static/locale.h $LFS/usr/include/compat/
+
+  $CC --sysroot="$LFS" \
+    -c ../static/musl-locale-compat.c \
+    -o ./musl-locale-compat.o
+
+  $AR rcs libmusl-locale-compat.a musl-locale-compat.o
+
+  install -m 0644 libmusl-locale-compat.a "$LFS/usr/lib/"
+
+
+  mkdir -p build-runtimes && cd build-runtimes
+
+  cmake -G "Unix Makefiles" ../runtimes \
+    -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;libcxxabi;libcxx" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_ASM_COMPILER=clang \
+    -DCMAKE_C_COMPILER_TARGET="$LFS_TGT" \
+    -DCMAKE_CXX_COMPILER_TARGET="$LFS_TGT" \
+    -DCMAKE_SYSROOT="$LFS" \
+    -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+    -DLIBCXX_USE_COMPILER_RT=ON \
+    -DLIBCXXABI_USE_COMPILER_RT=ON \
+    -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
+    -DLIBUNWIND_USE_COMPILER_RT=ON \
+    -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON \
+    -DLLVM_INCLUDE_TESTS=OFF \
+    -DLLVM_INCLUDE_TESTS=OFF  \
+    -DCMAKE_CXX_FLAGS="--target=$LFS_TGT -nostdinc++ -nostdlib++" \
+    -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+    -DCOMPILER_RT_BUILD_XRAY=OFF \
+    -DCOMPILER_RT_BUILD_PROFILE=OFF \
+    -DCOMPILER_RT_BUILD_MEMPROF=OFF \
+    -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
+    -DCOMPILER_RT_BUILD_ORC=OFF \
+    -DLIBCXX_ENABLE_LOCALIZATION=ON \
+    -DLIBCXXABI_HAS_CXA_THREAD_ATEXIT_IMPL=OFF \
+    -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+    -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-linux-musl \
+    -DLIBCXX_HAS_MUSL_LIBC=ON
+
+    
+    
+  make
+  make DESTDIR=$LFS install
+
+  cat > /tmp/hello.cpp <<'EOF'
+  #include <iostream>
+  #include <vector>
+
+  int main() {
+      std::vector<int> v{1,2,3};
+      std::cout << "hello libc++: " << v.size() << "\n";
+      return 0;
+  }
+  EOF
+
+  TRIPLE="x86_64-unknown-linux-musl"
+
+  clang++ --target="$LFS_TGT" --sysroot="$LFS" \
+    -nostdinc++ \
+    -isystem "$LFS/usr/include/$TRIPLE/c++/v1" \
+    -isystem "$LFS/usr/include/c++/v1" \
+    -stdlib=libc++ \
+    /tmp/hello.cpp -o /tmp/hello-libcxx
+
+  

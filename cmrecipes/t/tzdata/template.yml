@@ -1,0 +1,38 @@
+name: tzdata
+version: 2025a
+release: 1
+url: 
+  - https://www.iana.org/time-zones/repository/releases/tzdata2025a.tar.gz
+  - https://data.iana.org/time-zones/releases/tzcode2025b.tar.gz
+
+homepage: https://www.iana.org/time-zones
+
+license: Public Domain
+summary: time zone database
+description: |
+  time zone database
+
+
+phase: 4           
+order: 11            
+critical: true
+
+buildsteps: |
+  # normally the extract program --strip-components=1 -- This creates problems for this package. 
+  # So I have to extract both packages.
+  tar -xf ../tzdata2025a.tar.gz
+  tar -xf ../tzcode2025b.tar.gz
+  ZONEINFO=/usr/share/zoneinfo
+  mkdir -p $ZONEINFO/{posix,right}
+
+  for tz in etcetera southamerica northamerica europe africa antarctica asia australasia backward; do
+    zic -L /dev/null   -d $ZONEINFO       ${tz}
+    zic -L /dev/null   -d $ZONEINFO/posix ${tz}
+    zic -L leapseconds -d $ZONEINFO/right ${tz}
+  done
+
+  cp zone.tab zone1970.tab iso3166.tab $ZONEINFO
+  zic -d $ZONEINFO -p America/New_York
+  unset ZONEINFO
+
+  ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime

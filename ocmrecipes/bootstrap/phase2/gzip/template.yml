@@ -1,0 +1,25 @@
+name: gzip
+version: 1.13
+release: 1
+url: https://ftp.gnu.org/gnu/gzip/gzip-1.13.tar.xz
+homepage: https://www.gzip.org/
+license: GPL-3.0-or-later
+summary: gzip (Compression utility)
+description: |
+  gzip (GNU zip) is a compression utility designed to replace compress. gzip was written by Jean-loup Gailly (jloup@gzip.org) and Mark Adler.
+phase: 2
+order: 16
+critical: true
+buildsteps: |-
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  
+  ./configure --prefix=$LFS/usr --host=x86_64-linux-musl
+
+  make
+  make  install
+builddeps: []

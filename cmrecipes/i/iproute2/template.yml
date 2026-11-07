@@ -1,0 +1,26 @@
+name: iproute2
+version: 6.13.0
+release: 1
+url: https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.13.0.tar.xz
+homepage: https://www.kernel.org/pub/linux/utils/net/iproute2/
+
+license: GPL-2.0-only
+summary: Utilities for controlling TCP / IP networking
+description: |
+  Utilities for controlling TCP / IP networking
+phase: 4
+order: 325
+critical: true
+
+#builddeps: [ libelf ]
+
+buildsteps: |
+  sed -i /ARPD/d Makefile
+  rm -f man/man8/arpd.8
+
+  make NETNS_RUN_DIR=/run/netns
+
+  make SBINDIR=/usr/sbin install
+
+  mkdir -p             /usr/share/doc/iproute2-{version}
+  cp    COPYING README* /usr/share/doc/iproute2-{version}

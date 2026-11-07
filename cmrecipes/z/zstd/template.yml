@@ -1,0 +1,26 @@
+name: zstd
+version: 1.5.7
+release: 1
+url: https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz
+homepage: https://facebook.github.io/zstd/
+
+license: 
+summary: Zstandard is a real-time compression algorithm
+description: |
+  Zstandard is a real-time compression algorithm, providing high compression ratios. It offers a very wide range of compression / speed trade-offs, while being backed by a very fast decoder.
+
+phase: 4
+order: 35
+critical: true
+
+buildsteps: |
+  make prefix=/usr
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make prefix=/usr install
+  rm /usr/lib/libzstd.a

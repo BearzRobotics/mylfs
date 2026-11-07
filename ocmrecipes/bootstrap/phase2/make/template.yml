@@ -1,0 +1,28 @@
+name: make
+version: 4.4.1
+release: 1
+url: https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz
+homepage: https://www.gnu.org/software/make/
+license: GPL-3.0-or-later
+summary: Tool to compile sources trees
+description: |
+  Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files.
+phase: 2
+order: 9
+critical: true
+buildsteps: |-
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"
+
+  ./configure --prefix=$LFS/usr   \
+              --without-guile \
+              --build=$(build-aux/config.guess) \
+              --host=x86_64-linux-musl
+
+  make
+  make install
+builddeps: []

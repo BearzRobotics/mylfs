@@ -1,0 +1,32 @@
+name: gettext
+version: 0.24.0
+release: 1
+url: https://ftp.gnu.org/gnu/gettext/gettext-0.24.tar.xz
+homepage: https://www.gnu.org/software/gettext/
+
+license: GPL-3.0-or-later
+summary: Localisation support for programs
+description: |
+  The Gettext package contains utilities for internationalization and localization. These allow programs to be compiled with NLS (Native Language Support), enabling them to output messages in the user's native language.
+
+phase: 4
+order: 155
+critical: true
+
+#builddeps: [make]
+
+buildsteps: |
+  ./configure --prefix=/usr    \
+              --disable-static \
+              --docdir=/usr/share/doc/gettext-{version}
+
+  make
+  
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+  chmod 0755 /usr/lib/preloadable_libintl.so

@@ -1,0 +1,27 @@
+name: libtasn1
+version: 4.20.0
+release: 1
+url: https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz
+homepage: https://www.gnu.org/software/libtasn1/
+
+license: GPL-3.0-or-later
+summary: ASN.1 library
+description: |
+  libtasn1 is a library that provides Abstract Syntax Notation One (ASN.1) parsing and structures management, used in many cryptographic applications.
+
+phase: 5
+buildsystem: make
+builddeps: []
+
+buildsteps: |
+  ./configure --prefix=/usr --disable-static
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      make check
+  fi
+
+  make install
+
+  make -C doc/reference install-data-local
+

@@ -1,0 +1,79 @@
+name: gcc
+version: 14.2.0
+release: 1
+url:
+  - https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz
+  - https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.1.tar.xz
+  - https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
+  - https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz
+homepage: https://gcc.gnu.org/
+license: GPL-3.0-or-later WITH GCC-exception-3.1
+summary: GNU compiler collection
+description: |
+  The GNU Compiler Collection includes front ends for C, C++, Objective-C, Fortran, Java, Ada, and Go, as well as libraries for these languages (libstdc++, libgcj,...). GCC was originally written as the compiler for the GNU operating system. The GNU system was developed to be 100% free software, free in the sense that it respects the user's freedom.
+#phase: 2
+order: 25
+critical: true
+cleanup: false
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+
+  tar -xf ../mpfr-4.2.1.tar.xz
+  mv -v mpfr-4.2.1 mpfr
+  tar -xf ../gmp-6.3.0.tar.xz
+  mv -v gmp-6.3.0 gmp
+  tar -xf ../mpc-1.3.1.tar.gz
+  mv -v mpc-1.3.1 mpc
+
+  for p in ../patches/*.diff; do
+      echo "Applying patch $p"
+      patch -p1 < "$p"
+  done
+
+
+  case $(uname -m) in
+  x86_64)
+      sed -e '/m64=/s/lib64/lib/' \
+          -i.orig gcc/config/i386/t-linux64
+  ;;
+  esac
+
+  mkdir -vp s1build
+  cd        s1build
+
+  ../configure                    \
+      --target=$LFS_TGT           \
+      --prefix=$LFS/              \
+      --host=$LFS_TGT             \
+      --with-sysroot=$LFS         \
+      --enable-default-pie        \
+      --enable-default-ssp        \
+      --disable-nls               \
+      --disable-shared            \
+      --disable-multilib          \
+      --disable-threads           \
+      --disable-libatomic         \
+      --disable-libgomp           \
+      --disable-libquadmath       \
+      --disable-libssp            \
+      --disable-libvtv            \
+      --disable-libstdcxx         \
+      --enable-languages=c,c++    \
+      --disable-gnu-indirect-function
+   
+
+  export MAKE="${MAKE:-make} ${LIBTOOL_ARG:-}"
+  make all
+  make install
+
+  cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
+      `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include/limits.h
+
+  
+
+builddeps: []

@@ -1,0 +1,27 @@
+name: zlib
+version: 1.3.1
+release: 1
+url: https://zlib.net/fossils/zlib-1.3.1.tar.gz
+homepage: https://zlib.net/
+
+license: zlib
+summary: compression and decompression routines used by some programs.
+
+phase: 4
+order: 15
+critical: true
+
+buildsteps: |
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+
+  rm -f /usr/lib/libz.a

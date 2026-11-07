@@ -1,0 +1,21 @@
+name: efivar
+version: 39
+release: 1
+url: https://github.com/rhboot/efivar/archive/39/efivar-39.tar.gz
+homepage: https://github.com/rhboot/efivar
+
+license: LGPL-2.1-or-later
+summary:  Tools and libraries to manipulate EFI variables
+description: |
+  Tools and libraries to manipulate EFI variables
+phase: 5
+
+
+builddeps: [make, glibc]
+
+buildsteps: |
+    make ENABLE_DOCS=0
+    make install ENABLE_DOCS=0 LIBDIR=/usr/lib
+
+    install -vm644 docs/efivar.1 /usr/share/man/man1 &&
+    install -vm644 docs/*.3      /usr/share/man/man3

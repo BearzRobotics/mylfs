@@ -1,0 +1,38 @@
+name: python
+version: 3.13.2
+release: 1
+url: https://www.python.org/ftp/python/3.13.2/Python-3.13.2.tar.xz
+homepage: https://www.python.org/
+
+license: PSF License
+summary: General purpose cross platform scripting language
+
+phase: 4
+order: 250
+critical: true
+builddeps: [ libffi, openssl, zlib ]
+
+buildsteps: |
+  # added --with-ensurepip=yes \
+
+  ./configure --prefix=/usr        \
+              --enable-shared      \
+              --with-system-expat  \
+              --with-ensurepip=yes \
+              --enable-optimizations
+
+  make
+  
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make test TESTOPTS="--timeout 120"
+      set -e
+  fi
+
+  make install
+
+  cat > /etc/pip.conf << EOF
+  [global]
+  root-user-action = ignore
+  disable-pip-version-check = true
+  EOF

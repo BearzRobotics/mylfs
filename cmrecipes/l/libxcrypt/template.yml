@@ -1,0 +1,30 @@
+name: libxcrypt
+version: 4.4.38
+release: 1
+url: https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz
+homepage: https://github.com/besser82/libxcrypt/
+
+license: LGPL-2.1-or-later
+summary: Extended crypt library for descrypt, md5crypt, bcrypt, and others
+description: |
+  libxcrypt is a modern library for one-way hashing of passwords. It supports a wide variety of both modern and historical hashing methods: yescrypt, gost-yescrypt, scrypt, bcrypt, sha512crypt, sha256crypt, md5crypt, SunMD5, sha1crypt, NT, bsdicrypt, bigcrypt, and descrypt. It provides the traditional Unix interfaces as well as a set of extended interfaces pioneered by Openwall Linux.
+
+phase: 4
+order: 125
+critical: true
+
+buildsteps: |
+  ./configure --prefix=/usr                \
+              --enable-hashes=strong,glibc \
+              --enable-obsolete-api=no     \
+              --disable-static             \
+              --disable-failure-tokens
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make test
+      set -e
+  fi
+
+  make install

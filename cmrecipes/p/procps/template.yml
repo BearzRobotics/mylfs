@@ -1,0 +1,31 @@
+name: procps
+version: 4.0.5
+release: 1
+url: https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz
+homepage: https://gitlab.com/procps-ng/procps/
+
+license: GPL-2.0-or-later AND LGPL-2.1-or-later
+summary: The Procps-ng package contains programs for monitoring processes.
+description: |
+  The Procps-ng package contains programs for monitoring processes.
+phase: 4
+order: 395
+critical: true
+builddeps: [ ncurses ]
+
+buildsteps: |
+  ./configure --prefix=/usr                           \
+              --docdir=/usr/share/doc/procps-ng-{version} \
+              --disable-static                        \
+              --disable-kill
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      chown -R tester .
+      su tester -c "PATH=$PATH make check"
+      set -e
+  fi
+
+  make install

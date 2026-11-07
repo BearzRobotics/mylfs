@@ -1,0 +1,23 @@
+name: nghttp2
+version: 1.65.0
+release: 1
+url: https://github.com/nghttp2/nghttp2/releases/download/v1.65.0/nghttp2-1.65.0.tar.xz
+homepage: https://github.com/nghttp2/nghttp2
+
+license: MIT
+summary:  nghttp2 is an implementation of HTTP/2 and its header compression algorithm, HPACK.
+description: |
+    nghttp2 is an implementation of HTTP/2 and its header compression algorithm, HPACK.
+phase: 5
+
+
+builddeps: [make, glibc, libxml2]
+
+buildsteps: |
+    ./configure --prefix=/usr     \
+                --disable-static  \
+                --enable-lib-only \
+                --docdir=/usr/share/doc/nghttp2-{version} &&
+    make
+    
+    make install

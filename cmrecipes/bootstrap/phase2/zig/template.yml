@@ -1,0 +1,18 @@
+name: zig
+version: 0.16.0-dev.2510+bcb5218a2
+release: 1
+url: https://ziglang.org/builds/zig-x86_64-linux-0.16.0-dev.2510+bcb5218a2.tar.xz
+homepage: https://ziglang.org/
+
+license: MIT 2.0
+summary: Zig Compiler
+description: |
+    Zig Compiler
+
+#phase: 2
+#order: 18
+
+
+buildsteps: |
+    mv  zig $LFS/usr/bin 
+    mv  lib/* $LFS/usr/lib/

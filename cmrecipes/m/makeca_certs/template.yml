@@ -1,0 +1,22 @@
+name: makeca_certs
+version: 1.15
+release: 1
+url: https://github.com/lfs-book/make-ca/archive/v1.15/make-ca-1.15.tar.gz
+homepage: https://github.com/lfs-book/make-ca
+
+license: MIT
+summary: CA certificate management scripts
+description: |
+  make-ca provides scripts to download and manage CA certificates for SSL/TLS.
+
+phase: 5
+buildsystem: make
+builddeps: [makeca_install, wget]
+
+buildsteps: |
+  set +e
+  wget --no-check-certificate  https://hg.mozilla.org/mozilla-central/raw-file/tip/security/nss/lib/ckfw/builtins/certdata.txt
+  mkdir -pv /etc/make-ca/
+  cp certdata.txt /etc/make-ca/
+  make install
+  /usr/sbin/make-ca --force

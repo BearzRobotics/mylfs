@@ -1,0 +1,35 @@
+name: file
+version: 5.46
+release: 1
+url: https://astron.com/pub/file/file-5.46.tar.gz
+homepage: https://www.darwinsys.com/file/
+license: BSD-2-Clause
+summary: file (file type guesser)
+description: |
+  file is a command used to guess the "file type" of a file.  It reads the content to determine the data.
+phase: 26
+order: 6
+critical: true
+buildsteps: |-
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1 -rpath=$LFS/usr/lib"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+
+  mkdir build
+  pushd build
+  ../configure --disable-bzlib      \
+              --disable-libseccomp \
+              --host=x86_64-linux-musl
+              #--disable-xzlib      \
+  make
+  popd
+
+  ./configure --prefix=$LFS/usr --build=$(./config.guess)
+  make FILE_COMPILE=$(pwd)/build/src/file
+  make install
+
+  rm $LFS/usr/lib/libmagic.la
+builddeps: []

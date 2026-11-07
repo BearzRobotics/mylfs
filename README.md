@@ -14,6 +14,20 @@ https://youtu.be/3MTyv7hystI?si=jcm_VvVByv3tWD6Q
 On the other hand, some packages connect to the internet to download things. 
 If they fail most of the time, restarting them works.
 
+# cmrecipes
+This is a set of custom recipes to build LFS with Musl+Clang (Secondary compiler) + dinit
+
+Musl documention is a bit lacking. However this page points to
+two different standards: https://musl.libc.org/doc/1.1.24/manual.txt
+
+I have Downloaded them and copy them over to /usr/share/doc/musl/
+
+One is a pdf the other is html. Both a copy converted to plain text.
+
+Patches related to musl build came from https://github.com/richfelker/musl-cross-make
+
+
+
 # build
 mylfs requires libyaml to be installed on the system and curl in the path. CC 
 and CXX are set to clang and clang++ respetivly.

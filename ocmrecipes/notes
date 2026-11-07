@@ -1,0 +1,14 @@
+Rebuild
+
+
+in stage 5 rebuild ncurses against gpm (mouse support)
+
+
+
+upon entering the chroot I need to fix these paths in ld.musl-clang
+
+libc_lib="/mnt/data/code/py/mylfs-py/mnt/lfs/usr/lib" ldso="/mnt/data/code/py/mylfs-py/mnt/lfs/lib/ld-musl-x86_64.so.1" inside the chroot they need to be libc_lib="/usr/lib" ldso="/lib/ld-musl-x86_64.so.1"
+
+
+ld-musl-x86_64.so.1 -> /mnt/data/code/py/mylfs-py/mnt/lfs/usr/lib/libc.so needs to point to inside chroot to:
+    ld-musl-x86_64.so.1 -> /usr/lib/libc.so

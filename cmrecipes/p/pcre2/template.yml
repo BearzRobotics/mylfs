@@ -1,0 +1,29 @@
+name: pcre2
+version: 1
+release: 1
+url: https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.bz2
+homepage: https://github.com/PCRE2Project/pcre2/
+
+license: 
+summary:  
+description: |
+
+phase: 5
+
+
+builddeps: [make, glibc]
+
+buildsteps: |
+    ./configure --prefix=/usr                       \
+                --docdir=/usr/share/doc/pcre2-10.45 \
+                --enable-unicode                    \
+                --enable-jit                        \
+                --enable-pcre2-16                   \
+                --enable-pcre2-32                   \
+                --enable-pcre2grep-libz             \
+                --enable-pcre2grep-libbz2           \
+                --enable-pcre2test-libreadline      \
+                --disable-static                    &&
+    make
+
+    make install

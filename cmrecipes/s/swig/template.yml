@@ -1,0 +1,24 @@
+name: swig
+version: 4.3.0
+release: 1
+url: https://downloads.sourceforge.net/swig/swig-4.3.0.tar.gz
+homepage: https://downloads.sourceforge.net/swig
+
+license: GPL-3.0-or-later
+summary: SWIG (Simplified Wrapper and Interface Generator) is a compiler that integrates C and C++ with languages including Perl, Python, Tcl, Ruby, PHP, Java, JavaScript, C#, D, Go, Lua, Octave, R, Racket, Scilab, Scheme, and Ocaml. SWIG can also export its parse tree into Lisp s-expressions and XML.
+description: |
+    SWIG (Simplified Wrapper and Interface Generator) is a compiler that integrates C and C++ with languages including Perl, Python, Tcl, Ruby, PHP, Java, JavaScript, C#, D, Go, Lua, Octave, R, Racket, Scilab, Scheme, and Ocaml. SWIG can also export its parse tree into Lisp s-expressions and XML.
+    SWIG reads annotated C/C++ header files and creates wrapper code (glue code) in order to make the corresponding C/C++ libraries available to the listed languages, or to extend C/C++ programs with a scripting language.
+phase: 5
+
+
+builddeps: [make, glibc, pcre2, boost, zlib]
+
+buildsteps: |
+    ./configure --prefix=/usr                      \
+                --without-javascript               \
+                --without-maximum-compile-warnings &&
+    make
+
+    make install &&
+    cp -v -R Doc -T /usr/share/doc/swig-4.3.0

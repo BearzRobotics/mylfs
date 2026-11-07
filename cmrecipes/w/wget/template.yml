@@ -1,0 +1,19 @@
+name: wget
+version: 1.25.0
+release: 1
+url: https://ftp.gnu.org/gnu/wget/wget-1.25.0.tar.gz
+homepage: https://www.gnu.org/software/wget/
+
+license: GPL-3.0-or-later
+summary: Non-interactive network downloader
+description: |
+  wget is a free utility for non-interactive download of files from the Web.
+
+phase: 5
+buildsystem: make
+builddeps: [libpsl]
+
+buildsteps: |
+  ./configure --prefix=/usr --sysconfdir=/etc  --with-ssl=openssl 
+  make
+  make install

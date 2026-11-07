@@ -1,0 +1,31 @@
+name: less
+version: 668
+release: 1
+url: https://www.greenwoodsoftware.com/less/less-668.tar.gz
+homepage: https://www.greenwoodsoftware.com/less/
+
+license: 
+  - GPL-3.0-only
+  - BSD-2-Clause
+summary: less (file pager)
+description: |
+  less is a free open-source file pager. It is used to read files, but not modify them.
+  
+phase: 4
+order: 200
+critical: true
+
+builddeps: [ ncurses ]
+
+buildsteps: |
+  ./configure --prefix=/usr --sysconfdir=/etc
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install

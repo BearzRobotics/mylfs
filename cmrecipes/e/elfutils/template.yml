@@ -1,0 +1,33 @@
+name: elfutils
+version: 0.192
+release: 1
+url: https://sourceware.org/ftp/elfutils/0.192/elfutils-0.192.tar.bz2
+homepage: https://sourceware.org/elfutils/
+
+license: 
+  - GPL-2.0-or-later
+  - LGPL-3.0-or-later
+summary:  Utilities and library for manipulating ELF files
+description: |
+  The elfutils package contains set of utilities and libraries for handling ELF (Executable and Linkable Format) files.
+phase: 4
+order: 240
+critical: true
+builddeps: [make, glibc, libarchive, curl, xz, sqlite3]
+
+buildsteps: |
+  ./configure --prefix=/usr                \
+              --disable-debuginfod         \
+              --enable-libdebuginfod=dummy
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+  install -m644 config/libelf.pc /usr/lib/pkgconfig
+  rm /usr/lib/libelf.a

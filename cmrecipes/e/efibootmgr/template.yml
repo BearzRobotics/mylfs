@@ -1,0 +1,18 @@
+name: efibootmgr
+version: 39
+release: 1
+url: https://github.com/rhboot/efivar/archive/39/efivar-39.tar.gz
+homepage: https://github.com/rhboot/efivar
+
+license: GPL-2.0-only
+summary: a Linux user-space application to modify the Intel Extensible Firmware Interface (EFI) Boot Manager
+description: |
+  a Linux user-space application to modify the Intel Extensible Firmware Interface (EFI) Boot Manager
+phase: 5
+
+
+builddeps: [make, glibc, efivar, popt, mandoc]
+
+buildsteps: |
+    make EFIDIR=LFS EFI_LOADER=grubx64.efi
+    make install EFIDIR=LFS

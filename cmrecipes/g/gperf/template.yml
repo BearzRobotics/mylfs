@@ -1,0 +1,29 @@
+name: gperf
+version: 3.1
+release: 1
+url: https://ftp.gnu.org/gnu/gperf/gperf-3.1.tar.gz
+homepage: https://www.gnu.org/software/gperf/
+
+license: GPL-3.0-or-later
+summary: Gperf generates a perfect hash function from a key set
+description: |
+  Gperf generates a perfect hash function from a key set
+  
+phase: 4
+order: 185
+critical: true
+
+#builddeps: [make, glibc]
+
+buildsteps: |
+  ./configure --prefix=/usr --docdir=/usr/share/doc/gperf-{version}
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make -j1 check
+      set -e
+  fi
+
+  make install

@@ -1,0 +1,35 @@
+#https://www.linuxfromscratch.org/blfs/view/svn/general/icu.html
+
+name: icu
+version: 77.1
+release: 1
+url: https://github.com/unicode-org/icu/releases/download/release-77-1/icu4c-77_1-src.tgz
+homepage: https://github.com/unicode-org/icu
+
+license: 
+summary:  
+description: |
+
+phase: 5
+
+
+builddeps: [make, glibc]
+
+buildsteps: |
+    cd source                 
+
+    ./configure --prefix=/usr
+    make
+
+    make install
+    
+    cat >> /root/dknotes << "EOF"
+    Upgrading this package to a new major version (for example, from 72.1 to 76.1) will require rebuilding many other packages. If some packages that use the libraries built by icu4c-76 are rebuilt, they will use the new libraries while current packages will use the previous libraries. If the Linux application loader (/usr/lib/ld-linux-x86-64.so.2) determines that both the old and new libraries are needed, and a symbol (name of data or function) exists in both versions of the library, all references to the symbol will be resolved to the version appearing earlier in the breadth-first sequence of the dependency graph. This may result in the application failing if the definition of the data or the behavior of the function referred by the symbol differs between two versions. To avoid the issue, users will need to rebuild every package linked to an ICU library as soon as possible once ICU is updated to a new major version.
+
+    To determine what external libraries are needed (directly or indirectly) by an application or a library, run:
+
+    ldd <application or library> 
+    or to see only programs and libraries that directly use a library:
+
+    readelf -d  <application or library> | grep NEEDED
+    EOF

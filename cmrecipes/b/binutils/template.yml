@@ -1,0 +1,44 @@
+name: binutils
+version: 2.44.0
+release: 1
+url: https://sourceware.org/pub/binutils/releases/binutils-2.44.tar.xz
+homepage: https://www.gnu.org/software/binutils/
+
+license: GPL-3.0-or-later
+summary: contains a linker, an assembler, and other tools for handling object files
+description: |
+    The Binutils package contains a linker, an assembler, and other tools for handling object files.
+
+phase: 4
+order: 90
+critical: true
+
+#builddeps: [ zlib, glibc ]
+
+buildsteps: |
+    mkdir build
+    cd build
+
+    ../configure --prefix=/usr       \
+                --sysconfdir=/etc   \
+                --enable-gold       \
+                --enable-ld=default \
+                --enable-plugins    \
+                --enable-shared     \
+                --disable-werror    \
+                --enable-64-bit-bfd \
+                --enable-new-dtags  \
+                --with-system-zlib  \
+                --enable-default-hash-style=gnu
+
+    make tooldir=/usr
+
+    if [ "$RUN_TESTS" = "1" ]; then
+        set +e
+        make -k check 
+        set -e
+    fi
+
+    make tooldir=/usr install
+
+    rm -f /usr/lib/lib{bfd,ctf,ctf-nobfd,gprofng,opcodes,sframe}.a

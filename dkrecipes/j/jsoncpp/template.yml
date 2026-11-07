@@ -1,0 +1,19 @@
+name: jsoncpp
+version: 1.9.6
+release: 1
+url: https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.6.tar.gz
+homepage: https://github.com/open-source-parsers/jsoncpp
+license: MIT
+summary: C++ library for interacting with JSON
+description: |
+  JsonCpp is a C++ library for interacting with JSON. It provides a reader and 
+  writer for JSON data, as well as ways to manipulate the JSON values directly 
+  in C++ code.
+
+phase: 5
+builddeps: [cmake, ninja, glibc]
+
+buildsteps: |
+  cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr -G Ninja
+  ninja -C build
+  ninja -C build install

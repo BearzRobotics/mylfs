@@ -1,0 +1,20 @@
+name: libidn2
+version: 2.3.4
+release: 1
+url: https://ftp.gnu.org/gnu/libidn/libidn2-2.3.4.tar.gz
+homepage: https://www.gnu.org/software/libidn/
+
+license: GPL-3.0-or-later
+summary: Internationalized domain name library
+description: |
+  libidn2 is an implementation of the IDNA2008 specification for internationalized domain names.
+
+phase: 5
+buildsystem: make
+builddeps: [libunistring]
+
+buildsteps: |
+  ./configure --prefix=/usr
+  make
+  make check
+  make install

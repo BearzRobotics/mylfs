@@ -1,0 +1,18 @@
+name: hexcurse
+version: 1.60.0
+release: 1
+url: https://github.com/LonnyGomes/hexcurse/archive/refs/tags/v1.60.0.tar.gz
+homepage: https://github.com/LonnyGomes/hexcurse
+license: GPL-2.0-or-later
+summary: Ncurses-based hex editor
+description: |
+  Hexcurse is a hex editor for the terminal using ncurses. It allows viewing and 
+  editing binary files in hexadecimal and ASCII side-by-side with keyboard-driven navigation.
+
+phase: 5
+builddeps: [glibc, ncurses, make]
+
+buildsteps: |
+  ./configure --prefix=/usr
+  make
+  make install

@@ -1,0 +1,45 @@
+name: llvm
+version: 21.1.8      # Example LLVM release, adjust as needed
+release: 1
+url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-21.1.8.tar.gz
+homepage: https://llvm.org/
+
+license: Apache-2.0
+summary: LLVM binutils-equivalents (ar, ranlib, strip, nm, linker)
+description: |
+  LLVM provides replacements for GNU binutils tools including llvm-ar, llvm-ranlib, llvm-strip, llvm-nm, and the LLD linker.
+  These tools can be used with clang to build a complete system without GNU binutils.
+
+phase: 2
+order: 116
+
+buildsteps: |
+  # Set up sysroot for musl
+  export CC="clang"
+  export CXX="clang++"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export CFLAGS="--sysroot=$LFS -I$LFS/usr/include"
+  export CXXFLAGS="--sysroot=$LFS -I$LFS/usr/include"
+  export PM=$(grep -c processor /proc/cpuinfo)
+
+  # 
+  ################################
+  mkdir -vp build 
+  cd build
+
+  cmake ../runtimes \
+    -G "Unix Makefiles" \
+    -DLLVM_ENABLE_RUNTIMES="libcxxabi;libunwind;libcxx" \
+    -DCMAKE_INSTALL_PREFIX=$LFS/usr \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_SYSROOT=$LFS \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
+    -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
+    -DLIBCXX_ENABLE_SHARED=ON \
+    -DLIBCXX_ENABLE_STATIC=ON \
+    -DLIBCXX_HAS_MUSL_LIBC=ON
+
+
+  make && make install

@@ -1,0 +1,46 @@
+name: grub2-efi
+version: 1.23.0
+release: 1
+url: 
+    - https://ftp.gnu.org/gnu/grub/grub-2.12.tar.xz
+    - https://unifoundry.com/pub/unifont/unifont-16.0.01/font-builds/unifont-16.0.01.pcf.gz
+homepage: https://www.gnu.org/software/grub/
+
+license: 
+  - GPL-3.0-or-later # for included terminus fonts in redistributable BDF format
+  - OFL-1.1
+summary:  GRUB Boot Loader
+description: |
+  GRUB Boot Loader
+phase: 5
+
+critical: true
+builddeps: [ freetype2, libunistring, glibc, fuse, lvm2 ]
+
+buildsteps: |
+    mkdir -pv /usr/share/fonts/unifont &&
+    gunzip -c ../unifont-16.0.01.pcf.gz > /usr/share/fonts/unifont/unifont.pcf
+  
+    unset {C,CPP,CXX,LD}FLAGS
+
+    echo depends bli part_gpt > grub-core/extra_deps.lst
+
+    ./configure --prefix=/usr        \
+                --sysconfdir=/etc    \
+                --disable-efiemu     \
+                --with-platform=efi  \
+                --target=x86_64      \
+                --disable-werror     &&
+    make
+
+    make -C grub-core install
+
+    make install
+
+    #install -vm755 grub-mkfont /usr/bin/ &&
+    #install -vm644 ascii.h widthspec.h *.pf2 /usr/share/grub/
+    #install -vm755 grub-mount /usr/bin/
+
+    if [ -f /etc/bash_completion.d/grub ]; then
+      rm -rfv /etc/bash_completion.d/grub
+    fi

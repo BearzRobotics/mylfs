@@ -1,0 +1,37 @@
+name: rsync
+version: 3.4.1
+release: 1
+url: https://www.samba.org/ftp/rsync/src/rsync-3.4.1.tar.gz
+homepage: https://rsync.samba.org/
+
+license: GPL-3.0-or-later
+summary: Fast incremental file transfer utility
+description: |
+  rsync is a fast and versatile command-line utility that synchronizes files and directories
+  between two locations over a remote shell, or from/to a remote rsync daemon. It offers a wide
+  range of options for mirroring, backup, and archival tasks.
+
+phase: 4
+order: 435
+critical: true
+
+buildsteps: |
+  # Create group if it doesn't exist
+  if ! getent group rsyncd > /dev/null; then
+      groupadd -g 48 rsyncd
+  fi
+
+  # Create user if it doesn't exist
+  if ! id rsyncd > /dev/null 2>&1; then
+      useradd -c "rsyncd Daemon" -m -d /home/rsync -g rsyncd \
+          -s /bin/false -u 48 rsyncd
+  fi
+
+  ./configure --prefix=/usr    \
+              --disable-xxhash \
+              --without-included-zlib &&
+  make
+
+  cp -vfr ../static/rsyncd.conf /etc/rsyncd.conf
+
+  make install

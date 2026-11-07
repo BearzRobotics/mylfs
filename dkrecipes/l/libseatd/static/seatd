@@ -1,0 +1,28 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          seatd
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start the seatd daemon
+### END INIT INFO
+
+case "$1" in
+  start)
+    echo "Starting seatd..."
+    /usr/bin/seatd -g seat &
+    ;;
+  stop)
+    echo "Stopping seatd..."
+    pkill -f "/usr/bin/seatd -g seat" 
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+exit 0

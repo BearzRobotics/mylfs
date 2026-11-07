@@ -1,0 +1,25 @@
+name: libpng
+version: 1.6.47
+release: 1
+url: https://downloads.sourceforge.net/libpng/libpng-1.6.47.tar.xz
+homepage: https://downloads.sourceforge.net/libpng/
+
+license: 
+summary:  
+description: |
+
+phase: 5
+
+
+builddeps: [make, glibc]
+
+buildsteps: |
+    patch -Np1 -i ../patches/libpng-1.6.47-apng.patch
+
+
+    ./configure --prefix=/usr --disable-static 
+    make
+
+    make install
+    mkdir -vp /usr/share/doc/libpng-{version}
+    cp -vf README libpng-manual.txt /usr/share/doc/libpng-{version}

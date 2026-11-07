@@ -1,0 +1,15 @@
+name: lfs-tmpcup
+version: 0.0.0
+release: 1
+
+license: GPL-2.0-only
+summary: cleanup temp system
+
+phase: 3
+order: 8
+critical: true
+
+buildsteps: |
+  rm -rf /usr/share/{info,man,doc}/*
+  find /usr/{lib,libexec} -name \*.la -delete
+  rm -rf /tools

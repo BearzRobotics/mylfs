@@ -1,0 +1,26 @@
+name: sed
+version: 4.9
+release: 1
+url: https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz
+homepage: https://www.gnu.org/software/sed/
+license:
+summary:
+description: ""
+phase: 2
+order: 8
+critical: true
+buildsteps: |-
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 -static --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+
+  ./configure --prefix=$LFS/usr   \
+              --build=$(./build-aux/config.guess) \
+              --host=x86_64-linux-musl
+
+  make
+  make install
+builddeps: []

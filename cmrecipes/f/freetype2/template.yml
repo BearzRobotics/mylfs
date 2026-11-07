@@ -1,0 +1,32 @@
+name: freetype2
+version: 2.13.3
+release: 1
+url: 
+    - https://downloads.sourceforge.net/freetype/freetype-2.13.3.tar.xz
+    - https://downloads.sourceforge.net/freetype/freetype-doc-2.13.3.tar.xz
+homepage: https://downloads.sourceforge.net/freetype/
+
+license: GPL-2.0-or-later
+summary:  The FreeType2 package contains a library which allows applications to properly render TrueType fonts
+description: |
+    The FreeType2 package contains a library which allows applications to properly render TrueType fonts
+phase: 5
+
+
+builddeps: [make, glibc, zlib, libpng, brotli, bzip2, which]
+
+buildsteps: |
+    tar -xf ../freetype-doc-2.13.3.tar.xz --strip-components=2 -C docs
+
+    sed -ri "s:.*(AUX_MODULES.*valid):\1:" modules.cfg 
+
+    sed -r "s:.*(#.*SUBPIXEL_RENDERING) .*:\1:" \
+        -i include/freetype/config/ftoption.h 
+
+    ./configure --prefix=/usr --enable-freetype-config --disable-static
+    make
+
+    make install
+
+    cp -v -R docs -T /usr/share/doc/freetype-{version}
+    rm -v /usr/share/doc/freetype-2.13.3/freetype-config.1

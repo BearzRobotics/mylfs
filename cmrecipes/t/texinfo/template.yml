@@ -1,0 +1,27 @@
+name: texinfo
+version: 7.2
+release: 1
+url: https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz
+homepage: https://www.gnu.org/software/texinfo/
+
+license: GPL-3.0-or-later
+summary: texinfo (Documentation format used by GNU)
+description: |
+  textinfo is the documentation format used by the GNU project, invented by Richard Stallman and Bob Chassell. It is used to take a single source file and produce various outputs such as dvi, html, and pdf.
+
+phase: 4
+order: 355
+critical: true
+
+buildsteps: |
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install

@@ -1,0 +1,29 @@
+name: coreutils
+version: 9.6
+release: 1
+url: https://ftp.gnu.org/gnu/coreutils/coreutils-9.6.tar.xz
+homepage: https://www.gnu.org/software/coreutils/
+license: GPL-3.0-or-later
+summary: GNU core utilities
+description: "This package contains the basic file, shell and text manipulation utilities which are expected to exist on every operating system. \n"
+phase: 2
+order: 3
+critical: true
+buildsteps: |
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 --sysroot=$LFS -static"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  
+  ./configure --prefix=$LFS/usr                     \
+              --build=$(build-aux/config.guess) \
+              --enable-install-program=hostname \
+              --enable-no-install-program=kill,uptime \
+              --host=x86_64-linux-musl
+
+  make
+  make install
+
+builddeps: []

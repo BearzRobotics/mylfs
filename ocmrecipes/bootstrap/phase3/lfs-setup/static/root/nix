@@ -1,0 +1,325 @@
+#--------------------------------------------------------------------
+# 008.07 -- Chroot/boot - DJOK ADDED SOFTWARE - Nix
+#--------------------------------------------------------------------
+# Discripton:  Nix - Functional package manager
+# Requires Internet
+
+# Curl required a refresh
+mkdir -p /etc/ssl/certs
+wget -O /etc/ssl/certs/ca-certificates.crt https://curl.se/ca/cacert.pem
+
+# If in chroot no HOME from login program
+# set it manually
+export HOME=/root
+
+# multi user install
+bash <(curl -L -k https://nixos.org/nix/install) --daemon
+
+# make adding packages easy
+# everything can be configured and controlled from this package.
+echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
+
+# exit the chroot and rechroot
+exit 
+
+chroot "$MLFS" /bin/env -i \
+    HOME=/root                  \
+    TERM="$TERM"                \
+    PS1='(mlfs chroot) \u:\w\$ ' \
+    PATH=/usr/bin:/usr/sbin:/usr/local/bin:/tools/bin \
+    /bin/bash --login +h
+
+# SysVInit service files
+# ------------------------------------
+
+cat > /etc/init.d/nix-daemon << "EOF"
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          nix-daemon
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     3 5
+# Default-Stop:      0 1 6
+# Short-Description: Start the Nix package manager daemon
+# Description:       This script starts the Nix package manager daemon to allow users to install packages.
+### END INIT INFO
+
+DAEMON="/nix/var/nix/profiles/default/bin/nix-daemon"
+PIDFILE="/var/run/nix-daemon.pid"
+
+case "$1" in
+  start)
+    echo "Starting Nix daemon..."
+    if [ -f "$PIDFILE" ]; then
+      echo "Nix daemon is already running (PID $(cat $PIDFILE))"
+      exit 1
+    fi
+    $DAEMON &
+    echo $! > "$PIDFILE"
+    ;;
+  stop)
+    echo "Stopping Nix daemon..."
+    if [ -f "$PIDFILE" ]; then
+      kill "$(cat $PIDFILE)" && rm -f "$PIDFILE"
+    else
+      echo "Nix daemon is not running."
+    fi
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  status)
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat $PIDFILE)" 2>/dev/null; then
+      echo "Nix daemon is running (PID $(cat $PIDFILE))"
+    else
+      echo "Nix daemon is not running."
+      exit 1
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+esac
+EOF
+
+
+# install schript
+chmod +x /etc/init.d/nix-daemon
+ln -s /etc/init.d/nix-daemon /etc/rc.d/rc3.d/S99nix-daemon
+ln -s /etc/init.d/nix-daemon /etc/rc.d/rc5.d/S99nix-daemon
+ln -s /etc/init.d/nix-daemon /etc/rc.d/rc0.d/K10nix-daemon
+ln -s /etc/init.d/nix-daemon /etc/rc.d/rc6.d/K10nix-daemon
+
+# Nix garbage collector
+cat > /etc/init.d/nix-gc << "EOF"
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          nix-gc
+# Required-Start:    nix-daemon
+# Required-Stop:
+# Default-Start:     3 5
+# Default-Stop:
+# Short-Description: Run Nix garbage collection
+# Description:       This script periodically runs nix-collect-garbage to free up disk space.
+### END INIT INFO
+
+GC_CMD="/nix/var/nix/profiles/default/bin/nix-collect-garbage"
+LOGFILE="/var/log/nix-gc.log"
+PIDFILE="/var/run/nix-gc.pid"
+
+case "$1" in
+  start)
+    echo "Starting Nix garbage collection..."
+    if [ -f "$PIDFILE" ]; then
+      echo "Nix garbage collection is already running (PID $(cat $PIDFILE))"
+      exit 1
+    fi
+    nohup $GC_CMD --delete-older-than 30d >> $LOGFILE 2>&1 &
+    echo $! > "$PIDFILE"
+    ;;
+  stop)
+    echo "Stopping Nix garbage collection..."
+    if [ -f "$PIDFILE" ]; then
+      kill "$(cat $PIDFILE)" && rm -f "$PIDFILE"
+      echo "Nix garbage collection stopped."
+    else
+      echo "Nix garbage collection is not running."
+    fi
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  status)
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat $PIDFILE)" 2>/dev/null; then
+      echo "Nix garbage collection is running (PID $(cat $PIDFILE))"
+    else
+      echo "Nix garbage collection is not running."
+      exit 1
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+esac
+EOF
+
+
+# install
+chmod +x /etc/init.d/nix-gc
+ln -s /etc/init.d/nix-gc /etc/rc.d/rc3.d/S50nix-gc
+ln -s /etc/init.d/nix-gc /etc/rc.d/rc5.d/S50nix-gc
+
+# manually start nix
+/etc/init.d/nix-daemon start
+# ------------------------------------
+
+# create dinit service file for next
+# ------------------------------------
+cat > /etc/dinit.d/nix-daemon << "EOF"
+    type = process
+    command = /nix/var/nix/profiles/default/bin/nix-daemon --daemon
+    pid-file = /run/nix-daemon.pid
+    depends-on = network.target
+    restart=true
+EOF
+
+dinitcheck nix-daemon
+
+# if you only want to launch it when using nix
+dinitctl start nix-daemon
+# have it run all the time
+dinitctl enable nix-daemon
+# ------------------------------------
+
+# To allow the install of unfree software
+# add to /etc/profile.d/enviro.sh if you want it to be permenant
+export NIXPKGS_ALLOW_UNFREE=1
+
+# update nix-channels
+nix-channel --update
+
+# How to use
+#=================================
+# Package names can change over time
+# search for firefox
+nix search nixpkgs firefox
+# a better and cleaner way to search
+nix-env -qaP | grep <name of package>
+
+# install firefox 
+# in theory if you remove the sudo as a non root user it
+# should just install for that user. (untested)
+nix-env -iA nixpkgs.firefox
+
+# should just be able to run firefox
+which firefox
+/root/.nix-profile/bin/firefox
+
+# as normal user.
+which firefox
+/nix/var/nix/profiles/default/bin/firefox
+
+# install xorg or wayland
+nix-env -iA nixpkgs.xorg.xorgserver 
+nix-env -iA nixpkgs.xorg.xinit
+
+#wayland
+nix-env -iA nixpkgs.wlroots
+nix-env -iA nixpkgs.wayland-utils
+nix-env -iA nixpkgs.foot nixpkgs.alacritty
+
+# if you want a login manager
+#kde
+nix-env -iA nixpkgs.sddm
+#gnome
+nix-env -iA nixpkgs.gnome.gdm
+#lightweight
+nix-env -iA nixpkgs.lightdm
+
+# install desktops of your choice
+# KDE
+nix-env -iA nixpkgs.kdePackages.plasma-desktop
+nix-env -iA nixpkgs.kdePackages.kde-cli-tools
+nix-env -iA nixpkgs.kdePackages.kinit
+
+#Lxqt
+nix-env -iA nixpkgs.lxqt.lxqt-session
+nix-env -iA nixpkgs.lxqt.pcmanfm-qt
+nix-env -iA nixpkgs.lxqt.lxqt-panel
+nix-env -iA nixpkgs.openbox  # LXQt's default window manager
+
+#Mate
+nix-env -iA nixpkgs.mate.mate-session-manager
+nix-env -iA nixpkgs.mate.mate-panel
+nix-env -iA nixpkgs.mate.caja  # File manager
+
+#cinnamon
+nix-env -iA nixpkgs.cinnamon-common 
+
+# I3 window manager
+nix-env -iA nixpkgs.i3
+
+# Hyperland Window manger (wayland)
+export XDG_SESSION_TYPE=wayland
+export WLR_NO_HARDWARE_CURSORS=1
+export MOZ_ENABLE_WAYLAND=1  # For Firefox (optional)
+
+nix-env -iA nixpkgs.hyprland
+
+# startx manually
+startx
+
+echo "exec startplasma-x11" > ~/.xinitrc  # KDE
+echo "exec startxfce4" > ~/.xinitrc        # Xfce
+echo "exec startlxqt" > ~/.xinitrc          #lxqt
+echo "exec mate-session" > ~/.xinitrc       # mate
+echo "exec cinnamon-session" > ~/.xinitrc # cinnamon
+echo "exec i3" > ~/.xinitrc                 #I3 window manager
+
+# DJOK - I installed
+#===================
+# Xorg
+nix-env -iA nixpkgs.xorg.xorgserver  \
+          nixpkgs.xorg.xinit \
+          nixpkgs.xorg.xrandr \
+          nixpkgs.xorg.libX11 \
+          nixpkgs.xorg.libXft \
+          nixpkgs.xorg.libXinerama \
+          nixpkgs.xorg.libXcursor \
+          nixpkgs.xorg.libXext \
+          nixpkgs.xorg.libXdamage \
+          nixpkgs.xorg.libXcomposite \
+          nixpkgs.xorg.libXfixes \
+          nixpkgs.xorg.libXrender
+
+# configure (Can't do in Chroot)
+Xorg -configure
+cp ./xorg.conf.new /etc/X11/xorg.conf
+
+# Wayland
+nix-env -iA nixpkgs.wayfire \
+          nixpkgs.wayland \
+          nixpkgs.swaylock \
+          nixpkgs.swayidle \
+          nixpkgs.foot \
+          nixpkgs.wlroots \
+          nixpkgs.mako \
+          nixpkgs.greetd \
+          nixpkgs.kanshi \
+          nixpkgs.waybar \
+          nixpkgs.wl-clipboard
+
+
+# desktop
+nix-env -iA nixpkgs.cinnamon-session \
+          nixpkgs.cinnamon-control-center \
+          nixpkgs.cinnamon-settings-daemon \
+          nixpkgs.cinnamon-desktop \
+          nixpkgs.cinnamon-menus \
+          nixpkgs.cinnamon-screensaver \
+          nixpkgs.nemo \
+          nixpkgs.gnome-terminal \
+          nixpkgs.gnome-keyring \
+          nixpkgs.vimPlugins.cinnamon-nvim 
+
+nix-env -iA nixpkgs.firefox
+nix-env -iA nixpkgs.neovim 
+nix-env -iA nixpkgs.brave
+nix-env -iA nixpkgs.steam
+nix-env -iA nixpkgs.freecad 
+nix-env -iA nixpkgs.gimp
+nix-env -iA nixpkgs.krita
+nix-env -iA nixpkgs.mpv
+nix-env -iA nixpkgs.libreoffice-fresh
+nix-env -iA nixpkgs.vscode
+
+# setup startx
+echo "exec cinnamon-session" > ~/.xinitrc
+
+# Do not will in chroot
+startx
+

@@ -1,0 +1,28 @@
+name: findutils
+version: 4.10.0
+release: 1
+url: https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz
+homepage: https://www.gnu.org/software/findutils/
+license: GPL-3.0-or-later
+summary: findutils (basic directory searching utilities)
+description: |
+  findutils are basic directory searching tools and are often used with other programs for directory search and file locating.
+phase: 2
+order: 7
+critical: true
+buildsteps: |-
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-std=gnu99 -static --sysroot=$LFS"
+  export LDFLAGS="--sysroot=$LFS -Wl,--dynamic-linker=/lib/ld-musl-x86_64.so.1"
+  export PKG_CONFIG_SYSROOT_DIR="$LFS"
+  export PKG_CONFIG_PATH="$LFS/usr/lib/pkgconfig:$LFS/usr/share/pkgconfig"  
+  
+  ./configure --prefix=$LFS/usr                   \
+              --localstatedir=$LFS/var/lib/locate \
+              --build=$(build-aux/config.guess) \
+              --host=x86_64-linux-musl
+
+  make
+  make  install
+builddeps: []

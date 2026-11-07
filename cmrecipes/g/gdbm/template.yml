@@ -1,0 +1,30 @@
+name: gdbm
+version: 1.24
+release: 1
+url: https://ftp.gnu.org/gnu/gdbm/gdbm-1.24.tar.gz
+homepage: https://www.gnu.org/software/gdbm/
+
+license: GPL-3.0-or-later
+summary: Standard GNU database libraries
+description: |
+  GNU dbm is a set of database routines that use extensible hashing. It works similar to the standard UNIX dbm routines.
+phase: 4
+order: 180
+critical: true
+
+#builddeps: [make, gblic, readline]
+
+buildsteps: |
+  ./configure --prefix=/usr    \
+              --disable-static \
+              --enable-libgdbm-compat
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
