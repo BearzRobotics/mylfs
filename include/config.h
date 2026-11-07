@@ -6,7 +6,8 @@
 
 typedef struct {
     bool debug;
-    BuildPhase phase;
+    BuildPhase phase;        // phase being built, 0 based
+    BuildPhase startPhase;   // phase the build started in (--start-phase)
     char *packName;
     bool test;
     bool cleanup_src;

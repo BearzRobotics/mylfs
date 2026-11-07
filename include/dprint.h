@@ -9,5 +9,6 @@ void warn(const char *fmt, ...);
 void passed(const char *fmt, ...);
 void skip(const char *fmt, ...);
 void failed(const char *fmt, ...);
+void built(int count, const char *fmt, ...);
 void header(const char *fmt, ...);
 #endif

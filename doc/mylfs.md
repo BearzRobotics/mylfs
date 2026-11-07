@@ -43,10 +43,20 @@
                 build scripts that support it to run their test. Otherwise test 
                 are skipped.
         
-        --start-package <Package name>
-                This option is must be used with --start-phse <phase number>. 
+        --start-package <Package name> [<Package name> ...]
+                This option is must be used with --start-phase <phase number>.
                 The package name corilates to the "name:" tag inside of your 
-                template.ymal file and the phase. 
+                template.yml file and the phase.
+
+                In phases 1-4 the build resumes at the first name given.
+                In phase 5 only the named packages and their builddeps and
+                rundeps are built.
+
+        --build-path <path>
+                Overrides build_path from config.yml.
+
+        --recipes-path <path>
+                Overrides recipes_path from config.yml.
 
         --start-phase <phase-number>
                 This option accepts a number between 1 and 5.
@@ -103,18 +113,18 @@
         ```
 
 # NOTES
-        Even though the default make file builds mylfs as a static binary. If 
-        built against glibc it will still dynamically load getpwnam and
-        incompatablities between the version of glibc used to build against and 
-        the one ran against can create problems.
-        
-        It should also be noted that the python version may seem to have more 
-        functionality, but most of those features were never implemented.
+        mylfs is meant to be a fully static binary (see "static / musl build"
+        in the README). It looks up the lfs user by reading /etc/passwd itself
+        and never calls getpwnam(), so a static build does not depend on the
+        libc it was built against. Building against musl is still preferred.
 
-        If built against glibc even though -static is passed the use of getpwnam
-        will require dynamically loading  glibc. -- This should not be an issue
-        if built against musl. -- Though if not building in a native musl
-        enviroment all of mylfs deps must also be built against musl.
+        The build state of phases 4 and 5 is kept in recipes/build_state.db
+        inside the build dir, one line per package:
+        name|version|release|phase|built|builddeps|rundeps
+        This is a text file. The python edition's sqlite file of the same name
+        is not read.
+
+        A plain run always starts from phase 1. Use --start-phase to resume.
 
 # AUTHOR
     Author: Dakota James Owen Keeler

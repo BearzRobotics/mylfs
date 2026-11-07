@@ -19,7 +19,10 @@ version:         # Required - package version
 release:         # Optional - for internal versioning 
                               (e.g. release bump) [not implemented]
 
-url:             # Optional - source tarball URL
+url:             # Optional - source tarball URL, or a list of them.
+                              The first one is the main tarball and is extracted
+                              into source/. The others are only downloaded next
+                              to the template.yml (ie. gcc's mpfr, gmp and mpc).
 
 license:         # Optional - Know the legal restrictions on the code
 
@@ -56,7 +59,12 @@ rundeps:         # Optional - (phase 5 - only)
 buildsteps:      # Required - preparation steps. Everything below is a sh 
                               script (bash) for building
 
+critical: true  # Optional - If a critical package fails to build the phase
+                              stops. Otherwise the build moves on. Phase 5 never
+                              stops. (default false)
+
 cleanup: false   # Optional - Tells the build system to not delete the extract 
+                              (default true)
                               source on a successful build.
                               
                               It should be noted if your run the below it will 

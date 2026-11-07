@@ -24,6 +24,7 @@ recipes/**/*.zip
 
 # EXCEPTION: keep static_files.tar.gz in lfs-setup
 !recipes/bootstrap/phase3/lfs-setup/static/static_files.tar.gz
+!recipes/**/bootstrap/phase3/lfs-setup/static/static_files.tar.gz
 !dkrecipes/q/qbasic/pds71.zip
 
 dkrecipes/**/*.tar.gz
@@ -238,3 +239,6 @@ secrets.yml
 *.swp
 *.swo
 *~
+
+# libyaml built by tools/build-libyaml-musl.sh
+deps/

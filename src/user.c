@@ -9,36 +9,51 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-#include <pwd.h> // password file
 #include <unistd.h>
-#include <pwd.h>
-#include <grp.h>
 
 #include "dprint.h"
 #include "config.h"
+#include "fs.h"
+#include "user.h"
+
+bool lookupUser(const char *name, uid_t *uid, gid_t *gid) {
+    FILE *fp = fopen("/etc/passwd", "re");
+    if (!fp) {
+        return false;
+    }
+
+    // name:passwd:uid:gid:gecos:home:shell
+    char line[1024];
+    bool found = false;
+    size_t nlen = strlen(name);
+
+    while (fgets(line, sizeof line, fp)) {
+        if (strncmp(line, name, nlen) != 0 || line[nlen] != ':') continue;
+
+        char *save = NULL;
+        strtok_r(line, ":", &save);               // name
+        strtok_r(NULL, ":", &save);               // passwd
+        char *u = strtok_r(NULL, ":", &save);     // uid
+        char *g = strtok_r(NULL, ":", &save);     // gid
+        if (!u || !g) continue;
+
+        if (uid) *uid = (uid_t)strtoul(u, NULL, 10);
+        if (gid) *gid = (gid_t)strtoul(g, NULL, 10);
+        found = true;
+        break;
+    }
+
+    fclose(fp);
+    return found;
+}
 
 // Test whether the LFS user exist
-// NOTE: getpwnam requires glibc NSS at runtime even in static builds.
-// This binary is intended for musl-based systems where this is not an issue.
 bool lfsUserExist(void) {
-    // man getpwnam
-    // when creating a variable that returns a pointer from a struct
-    // you must use the struct keyword <nameofstruct> <type> = function that returns
-    // the struct
-
-    //getpwnam has mutliple backends and even in static linking will loaded the
-    //appropriate backend. -- This can cause breakage if glibc version is incompatiable
-    //with the one the static program was compiled against.
-    struct passwd *pw = getpwnam("lfs");
-    if (pw == NULL) {
-        return false; // user doesn't exist
-    } else {
-        return true; // user does exist.
-    }
+    return lookupUser("lfs", NULL, NULL);
 }
 
 // Create the LFS user
-bool creatLfsUser(Config cfg) {
+bool creatLfsUser(void) {
     // system technincally runs a system shell. 
     // It would probably become more efficent to fork it.
     // useradd -- adds a user to the system
@@ -82,17 +97,26 @@ bool chownLfsFiles(Config cfg) {
     fclose(fbpr);
 
     // We need to make sure our user lfs owns those files
-    struct passwd *pw =getpwnam("lfs");
-    if (!pw) {
+    uid_t uid;
+    gid_t gid;
+    if (!lookupUser("lfs", &uid, &gid)) {
         failed("User lfs could not be found!\n This should not be happing because we just created it!\n");
         return false;
     }
 
-    chown("/home/lfs/.bash_profile", pw->pw_uid, pw->pw_gid);
-    chown("/home/lfs/.bashrc", pw->pw_uid, pw->pw_gid);
-    chown(cfg.buildPath, pw->pw_uid, pw->pw_gid);
+    if (chown("/home/lfs/.bash_profile", uid, gid) != 0 || chown("/home/lfs/.bashrc", uid, gid) != 0) {
+        perror("chown");
+    }
 
-    passed("User 'lfs' created successfully\n");
+    // Everything under the build dir (tools, recipes, ...) has to be writable
+    // by lfs for phase 1 and 2. This does not cross into mounted filesystems.
+    if (!chownTree(cfg.buildPath, uid, gid)) {
+        failed("could not chown: %s to the lfs user\n", cfg.buildPath);
+        return false;
+    }
+
+    passed("chowned %s to the lfs user\n", cfg.buildPath);
+    return true;
 }
 
 // Delete the LFS user for cleanup
@@ -100,6 +124,9 @@ bool deleteLfsUser(void) {
     // userdel deletes a user account
     // -r removes the home dir
     // lfs is the user account
+    if (!lfsUserExist()) {
+        return true;
+    }
     if (system("userdel -r lfs") != 0) {
         fprintf(stderr, "Failed to delete user\n");
         return false;

@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <ftw.h>
 
 #include "phase.h"
 #include "config.h"
@@ -18,32 +17,35 @@ typedef struct {
 
     /* Optional scalars */
     char  *release;     // YAML: release (string is safest)
-    char  *url;         // YAML: url
     char  *license;     // YAML: license
     char  *summary;     // YAML: summary
     char  *homepage;    // YAML: homepage
     char  *description; // YAML: description (may be multi-line)
 
     /* Optional typed fields */
-    BuildPhase   phase;      // YAML: phase ("phase1"...)
-    int32_t order;      // YAML: order (bootstrap only); use a sentinel if unset
+    int     phase;      // YAML: phase (1-5 in the file). Stored as a BuildPhase
+                        // (0-4) or -1 when the recipe doesn't set one.
+    int32_t order;      // YAML: order (bootstrap only)
     bool    has_order;
+    bool    critical;   // YAML: critical. A failed critical recipe stops the build.
 
     /* Optional lists */
+    StrList urls;       // YAML: url (a single string or a list). The first one is
+                        // the main tarball that gets extracted, the others are
+                        // only downloaded next to it.
     StrList builddeps;  // YAML: builddeps
     StrList rundeps;    // YAML: rundeps
 
     /* Optional flags */
-    bool cleanup;       // YAML: cleanup (default false)
+    bool cleanup;       // YAML: cleanup (default true)
 
     // These are not set in the template.yml but meta data about each template.yml
-    char *path;           // absolute/real path to template.yml
-    char *root;           // optional: recipe root directory (folder containing template.yml)
-    char *tarballName;    // Later we will extarct the tarball name into here.
-    char *tarballPath;    // This should be path + tarballName
-    char *recipeSource;   // Location to extract tarball too.
+    char *path;           // path to template.yml
+    char *root;           // recipe root directory (folder containing template.yml)
+    char *tarballName;    // basename of the first url. NULL if there is no url
+    char *tarballPath;    // root + tarballName. NULL if there is no url
+    char *recipeSource;   // root/source if there is a url, otherwise root/static
 } Recipe;
-
 
 typedef struct {
     Recipe *data;
@@ -52,20 +54,28 @@ typedef struct {
 } RecipeList;
 
 /* ---- helpers ---- */
-
 void recipeInit(Recipe *r);
 void recipeFree(Recipe *r);
 
 void recipelistInit(RecipeList *v);
 void recipelistFree(RecipeList *v);
-void recipelistPush(RecipeList *v, Recipe *value);
+void recipelistPush(RecipeList *v, Recipe *value);   // takes ownership of *value
 
-static int findTemplates(const char *path, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
-
+// Finds every template.yml under cfg.recipesPath
 StrList scanRecpies(Config cfg);
-StrList buildOrderBootStrap(Config cfg, StrList RL);
-StrList buildOrderP5(Config cfg, StrList RL);
-void downloadTarballs(const char *url);
-Recipe loadRecipe(Config cfg, const char *templatPath);
+
+// Parses one template.yml. Returns false (and prints why) on failure.
+bool loadRecipe(Config cfg, const char *templatePath, Recipe *out);
+
+// Scans and loads every recipe under cfg.recipesPath.
+bool loadAllRecipes(Config cfg, RecipeList *out);
+
+// Downloads the tarballs of every recipe with phase <= maxPhase that isn't already
+// next to its template.yml. Returns false if any download failed.
+bool downloadTarballs(Config cfg, const RecipeList *rl, int maxPhase);
+
+// Fills `out` with copies of every recipe in `phase`, sorted by `order`. The
+// copies share their strings with `all`, so only free `all`. Free `out`->data.
+void sortRecipes(const RecipeList *all, int phase, RecipeList *out);
 
 #endif /* BE242EA5_33D7_4833_8E93_AE49272194BC */

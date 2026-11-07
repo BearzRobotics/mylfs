@@ -33,3 +33,11 @@ Phase 5
    Any phase 4 recipe with a builddeps: option listed will be rebuilt in
    phase 5. As some packages can have optional build deps that enable more
    features if they're present at build time.
+
+   Recipes in phase 4 and 5 are ordered by their builddeps. A recipe is
+   skipped when:
+      - it is already built (recorded in recipes/build_state.db)
+      - one of its builddeps failed or has no recipe
+   Raising the release: of a built recipe rebuilds it and everything that
+   builddeps on it. Phase 4 recipes that have no builddeps are recorded as
+   built when phase 4 finishes. The ones with builddeps are rebuilt here.

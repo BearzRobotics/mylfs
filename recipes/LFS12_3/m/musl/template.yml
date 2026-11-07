@@ -1,0 +1,26 @@
+name: musl
+version: 1.2.5
+release: 1
+url: https://musl.libc.org/releases/musl-1.2.5.tar.gz
+homepage: https://musl.libc.org/
+
+license: MIT
+summary: Lightweight and fast C standard library
+description: |
+  musl is a lightweight, fast, and simple implementation of the standard C library, intended for static linking. It is installed beside glibc in /usr/local/musl and is only used through musl-gcc to build fully static programs, such as mylfs itself.
+
+phase: 5
+order: 900
+
+builddeps: [make, gcc]
+
+buildsteps: |
+  ./configure --prefix=/usr/local/musl --disable-shared
+
+  make
+  make install
+
+  # musl-gcc wants the kernel headers next to its own. They are the ones LFS installed.
+  for d in linux asm asm-generic mtd rdma scsi sound video xen; do
+      [ -e /usr/include/$d ] && ln -sfn /usr/include/$d /usr/local/musl/include/$d
+  done

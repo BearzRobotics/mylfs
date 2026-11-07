@@ -1,0 +1,24 @@
+name: mylfs
+version: 0.0.6
+release: 1
+url: https://github.com/BearzRobotics/mylfs/archive/refs/heads/c-rewrite.tar.gz
+homepage: https://github.com/BearzRobotics/mylfs
+
+license: GPL-2.0-only
+summary: Tool for bootstrapping Linux From Scratch systems
+description: |
+  mylfs, the C edition, built fully static against musl so the binary runs on this system and on any other one regardless of libc.
+
+phase: 5
+order: 902
+
+builddeps: [make, musl, libyaml]
+rundeps: [rsync, tar, unzip, curl]
+
+buildsteps: |
+  make CC=/usr/local/musl/bin/musl-gcc YAML_PREFIX=/usr/local/musl
+
+  install -vDm755 bin/mylfs /usr/local/bin/mylfs
+  install -vDm644 config.yml /usr/share/doc/mylfs/config.yml
+  install -vDm644 README.md /usr/share/doc/mylfs/README.md
+  install -vDm644 doc/mylfs.md /usr/share/doc/mylfs/mylfs.md

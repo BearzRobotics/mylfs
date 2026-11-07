@@ -3,7 +3,7 @@ This is inspired by [MyLFS](https://github.com/TheKingKerellos/MyLFS), I forked
 it to my github and built a fully working x windows stack.
 
 If a package fails to download and it's from the linux kernel git site. I had to 
-manually download them first in a browser and then wget worked. -- It's a bot 
+manually download them first in a browser and then curl worked. -- It's a bot 
 protection mechanism they're using. -- If you download the right version and 
 drop it in place the program will just pick up like normal. As if it was already 
 downloaded.
@@ -26,9 +26,27 @@ and CXX are set to clang and clang++ respetivly.
 sudo ./mylfs
 ```
 
+## static / musl build
+mylfs should be a fully static binary so it runs on the build host, on the
+system it builds, and on a musl one. It never calls getpwnam()/NSS (it reads
+/etc/passwd itself), so it doesn't depend on the libc it was built against.
+With zig installed:
+
+```sh
+tools/build-libyaml-musl.sh            # static libyaml against musl -> deps/libyaml
+make musl YAML_PREFIX=$PWD/deps/libyaml
+make check                             # confirms bin/mylfs is static
+```
+
+On the built system the `musl`, `libyaml` and `mylfs` phase 5 recipes build it
+natively with musl-gcc.
+
 This is a hack. However, in phase5 it's build function has logic to use 
 --start-package List[str] and pulls out it builds deps
-> **Note:** Output below is from the Python edition. C port in progress.
+> **Status:** The C edition has all 5 phases. Phase 5 state is kept in
+> `recipes/build_state.db` inside the build dir as a text file. The python
+> edition's sqlite `build_state.db` is not read. The output below is from the
+> Python edition.
 ```sh
 ./mylfs --start-phase 5 --start-package nwipe
 
@@ -100,7 +118,7 @@ into zig until that settles.
 [] - autotools
 [] - coreutils
 [] - qemu
-[] - wget
+[] - curl
 
 # Things I hate about C!
    * glibc is a nightmare to program with. With access unix features only working

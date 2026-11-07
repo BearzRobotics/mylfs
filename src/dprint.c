@@ -76,6 +76,22 @@ void skip(const char *fmt, ...) {
 
 
 
+void info(const char *fmt, ...) {
+    const char *nocolor = getenv("NO_COLOR");
+
+    char mesg[4096];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(mesg, sizeof mesg, fmt, ap);
+    va_end(ap);
+
+    if (nocolor != NULL) {
+        printf("    [info]    %s", mesg);
+    } else {
+        printf("%s    [info]%s    %s", gray, reset, mesg);
+    }
+}
+
 void warn(const char *fmt, ...) {
     const char *nocolor = getenv("NO_COLOR");
  

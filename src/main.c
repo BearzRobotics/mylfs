@@ -10,12 +10,16 @@
 #include <unistd.h> //getuid chown
 #include <errno.h>
 #include <limits.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 #include <yaml.h>
 
 #include "config.h"
 #include "dprint.h"
 #include "phase.h"
+#include "proc.h"
+#include "builder.h"
 #include "fs.h"
 #include "recipe.h"
 #include "user.h"
@@ -31,7 +35,7 @@ const char* help_mesg =
     "   --help\n    Prints out this help menu\n"
     "   --test\n    Tells whether to run the test if a recipe supports it\n"
     "   --start-package <Package name>\n        Takes the name of a recipe\n"
-    "   --start-pahse   <phase number>\n        Accpets 1-5 for what phase to start in\n"
+    "   --start-phase   <phase number>\n        Accpets 1-5 for what phase to start in\n"
     "   --version\n Prints the current version number of the program\n\n"
 
     "See the config.yml for information on the config file.\n\n"
@@ -122,7 +126,6 @@ int loadConfig(Config *cfg, const char *cfpath){
                     char *rp = realpath(value, NULL);
                     if (!rp) {
                         perror("realpath");
-                            char cmd[4096];
                         failed("build_path does not exist: %s\n     Create it first (e.g. mkdir -p '%s')\n", value, value);
                         exit(1);
                     }
@@ -130,7 +133,13 @@ int loadConfig(Config *cfg, const char *cfpath){
                     cfg->buildPath = rp;   // take ownership
 
                 } else if (strcmp(current_key, "recipes_path") == 0) {
-                    cfg->recipesPath = strdup(realpath(value, NULL));
+                    char *rp = realpath(value, NULL);
+                    if (!rp) {
+                        perror("realpath");
+                        failed("recipes_path does not exist: %s\n", value);
+                        exit(1);
+                    }
+                    cfg->recipesPath = rp;
                 } else if (strcmp(current_key, "bootstrap_only") == 0) {
                     cfg->bootstrap = parse_bool(value);
                 } else if (strcmp(current_key, "version_check") == 0) {
@@ -200,7 +209,7 @@ bool versionCheck(Config cfg) {
         };
 
 
-        if (execve("/usr/bin/bash", argv ,environ) != 0) {
+        if (execve(hostBash(), argv, environ) != 0) {
             perror("execve");
             _exit(1);
         }
@@ -208,22 +217,17 @@ bool versionCheck(Config cfg) {
         _exit(0);
     }
 
-    int status;
-    wait(&status);
-
-    // stole this from chatGPT
     close(pipefd[1]); // parent doesn't write
 
     char buffer[4096];
     size_t total = 0;
-    char *output = NULL;
+    char *output = strdup("");
 
     ssize_t n;
     while ((n = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
         char *tmp = realloc(output, total + n + 1);
         if (!tmp) {
             perror("realloc");
-            free(output);
             break;
         }
         output = tmp;
@@ -231,20 +235,118 @@ bool versionCheck(Config cfg) {
         total += n;
         output[total] = '\0';
     }
-
     close(pipefd[0]);
 
-    // back
-    if (status == 0) {
-        if (cfg.debug) {
-            printf("%s", output);
-        } 
-        return true;
-    } else {
+    // the child closes its end when it exits, so this is after the read
+    int status;
+    waitpid(pid, &status, 0);
+    bool ok = WIFEXITED(status) && WEXITSTATUS(status) == 0;
+
+    if (ok && cfg.debug) {
         printf("%s", output);
+    } else if (!ok) {
+        printf("%s", output);
+    }
+    free(output);
+    return ok;
+}
+
+// Runs a fresh/resumed build. Everything that has to be undone afterwards
+// is undone by the caller.
+static bool runBuild(Config *cfg, const StrList *startPkgs) {
+    // Only the packages up to the last phase we build need to be downloaded.
+    int lastPhase = cfg->bootstrap ? LFS_BASE : EXTRA_PACKAGES;
+
+    // Download into the real recipes dir so the tarballs are kept between builds
+    RecipeList src;
+    loadAllRecipes(*cfg, &src);
+    if (!downloadTarballs(*cfg, &src, lastPhase)) {
+        failed("Some tarballs could not be downloaded. See the above messages.\n");
+        recipelistFree(&src);
         return false;
     }
+    recipelistFree(&src);
 
+    // The chroot can only see what is inside the build dir.
+    // build_state.log has to survive that, it's the record of what was built.
+    char keep[PATH_MAX + 32], log[PATH_MAX + 32];
+    snprintf(keep, sizeof keep, "%s/.build_state.log", cfg->buildPath);
+    snprintf(log, sizeof log, "%s/recipes/build_state.log", cfg->buildPath);
+    rename(log, keep);
+
+    bool copied = copyRecipeDir(*cfg);
+    rename(keep, log);
+    if (!copied) return false;
+
+    // From here on use the copy, that's the one the chroot sees as /recipes
+    char copy[PATH_MAX];
+    snprintf(copy, sizeof copy, "%s/recipes", cfg->buildPath);
+    cfg->recipesPath = strdup(copy);
+
+    RecipeList recipes;
+    if (!loadAllRecipes(*cfg, &recipes)) {
+        warn("Some recipes could not be loaded and will be ignored\n");
+    }
+    passed("Loaded %zu recipes.\n", recipes.size);
+
+    bool ok = true;
+
+
+    while (ok && (int)cfg->phase <= lastPhase) {
+        BuildPhase phase = cfg->phase;
+        const StrList *pkgs = (phase == cfg->startPhase) ? startPkgs : NULL;
+
+        switch (phase) {
+        case CROSS_TOOLS: header("Phase 1 - Cross Tools"); break;
+        case TEMP_TOOLS:  header("Phase 2 - Temp Tools"); break;
+        case TEMP_SYSTEM: header("Phase 3 - Temp system"); break;
+        case LFS_BASE:    header("Phase 4 - LFS Base System"); break;
+        case EXTRA_PACKAGES: header("Phase 5 - Building final system"); break;
+        }
+
+        // The lfs user only builds phase 1 and 2. Everything after that happens
+        // as root inside the chroot.
+        if (phase < TEMP_SYSTEM) {
+            if (lfsUserExist()) {
+                warn("lfs already existed!\n");
+            } else if (!creatLfsUser()) {
+                failed("Could not create the lfs user!\n");
+                ok = false;
+                break;
+            } else {
+                passed("lfs user succefully created\n");
+            }
+            if (!chownLfsFiles(*cfg)) {
+                failed("To setup .bashrc, .bash_profile or chown %s\n", cfg->buildPath);
+                ok = false;
+                break;
+            }
+        } else {
+            if (lfsUserExist() && !deleteLfsUser()) {
+                warn("Could not delete the lfs user\n");
+            }
+            if (!mountVfs(*cfg)) {
+                ok = false;
+                break;
+            }
+        }
+
+        ok = builderPhase(*cfg, phase, &recipes, pkgs);
+        if (!ok) {
+            failed("Phase %d has failed!\n", (int)phase + 1);
+            break;
+        }
+
+        cfg->phase = phase + 1;
+        setPhase(*cfg, (short)cfg->phase);
+    }
+
+    if (ok) {
+        passed("Done! The system is built in %s\n", cfg->buildPath);
+    }
+
+    recipelistFree(&recipes);
+    return ok;
 }
 
 int main(int argc, char* argv[]) {
@@ -253,16 +355,30 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+    // A recipe that exits early would otherwise kill us when we write its script
+    signal(SIGPIPE, SIG_IGN);
+
     // Stack can contain random non-zero data that was causing my 
     // bool debug to always evaluate as true. Initializing it like
     // with the {0} fixed it.
-    Config cfg = {0, .phase=0};
+    Config cfg = {0};
 
     //load our yaml config. By loading it here it will allow our command line options to 
     // override it.
     loadConfig(&cfg, "./config.yml");
 
-    for (int i = 0; i < argc; i++) {
+    if (!cfg.buildPath || !cfg.recipesPath || !cfg.lfs_tgt) {
+        failed("config.yml must set build_path, recipes_path and lfs_tgt\n");
+        exit(1);
+    }
+
+    bool startPhaseGiven = false;
+    StrList startPkgs;
+    strlistInit(&startPkgs);
+
+    for (int i = 1; i < argc; i++) {
+        bool hasArg = (i + 1 < argc);
+
         if (strcmp(argv[i], "--debug") == 0) {
             cfg.debug = true;
         } else if (strcmp(argv[i], "--help") == 0) {
@@ -274,6 +390,10 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "--bootstrap") == 0) {
            cfg.bootstrap = true;
         } else if (strcmp(argv[i], "--chroot") == 0) {
+            if (!hasArg) {
+                failed("--chroot needs the path to chroot into\n");
+                exit(1);
+            }
             // unistd.h _GNU_SOURCE
             // chroot syscall only changes the root dir of the current process
             char *resolved = realpath(argv[i+1], NULL);
@@ -332,17 +452,52 @@ int main(int argc, char* argv[]) {
            
         } else if (strcmp(argv[i], "--test") == 0) {
            cfg.test = true;
-        } else if (strcmp(argv[i], "--start-package") == 0) {
-           cfg.packName = argv[i+1];
-        } else if (strcmp(argv[i], "--start-phase") == 0) {
-           //cfg.phase = argv[i+1];
-            cfg.phase = (short)atoi(argv[i + 1]);
+        } else if (strcmp(argv[i], "--start-package") == 0 && hasArg) {
+           // takes one or more names: --start-package nwipe parted
+           while (i + 1 < argc && strncmp(argv[i + 1], "--", 2) != 0) {
+               strlistPush(&startPkgs, strdup(argv[++i]));
+           }
+        } else if (strcmp(argv[i], "--build-path") == 0 && hasArg) {
+           char *rp = realpath(argv[++i], NULL);
+           if (!rp) {
+               failed("--build-path does not exist: %s\n", argv[i]);
+               exit(1);
+           }
+           cfg.buildPath = rp;
+        } else if (strcmp(argv[i], "--recipes-path") == 0 && hasArg) {
+           char *rp = realpath(argv[++i], NULL);
+           if (!rp) {
+               failed("--recipes-path does not exist: %s\n", argv[i]);
+               exit(1);
+           }
+           cfg.recipesPath = rp;
+        } else if (strcmp(argv[i], "--start-phase") == 0 && hasArg) {
+            int n = atoi(argv[++i]);
+            if (n < 1 || n > 5) {
+                failed("--start-phase takes a number between 1 and 5\n");
+                exit(1);
+            }
+            startPhaseGiven = true;
+            cfg.phase = (BuildPhase)(n - 1);   // the command line is 1 based
+        } else {
+            failed("Unknown option or missing argument: %s\n", argv[i]);
+            help();
+            exit(1);
         }
+    }
+    cfg.startPhase = cfg.phase;
+
+    if (startPkgs.size > 0 && !startPhaseGiven) {
+        failed("--start-package must be used with --start-phase\n");
+        exit(1);
     }
 
     header("mylfs-c edition");
     if (cfg.debug == true) {
         printf("[Debug] Mode has been enabled!\n");
+    }
+    if (!cfg.test) {
+        warn("skipping tests\n");
     }
 
     if (versionCheck(cfg) == false) {
@@ -352,84 +507,44 @@ int main(int argc, char* argv[]) {
         passed("Your system meets the mininum requirments!\n");
     }
 
-    // need to check for required tools
-    // check if builderDir is empty 
-    //      If it isn't ask if they want to delete it
-    if (isDirEmpty(cfg, cfg.buildPath) == false) {
-        warn("Build dir is not empty. Do you want to delete the contents y/n: ");
-        int input;
-        input = getchar(); 
-        if (input == 'y')  {
-            deleteDirContents(cfg, cfg.buildPath);
-        }
-    }
-
-
-
-    // initalize recipes 
-    StrList templatePath = scanRecpies(cfg);
-    static RecipeList recpies;
-    recipelistInit(&recpies);
-
-    //loadRecipes(cfg, templatePath, &recpies);
-
-
-    //      Download packages
-
-    // Copies recipes over
-    copyRecipeDir(cfg);
-    
-    // lfs users 
-    if (lfsUserExist() == true) {
-        warn("lfs already existed!\n");
-    } else {
-        // create lfs user
-        if (creatLfsUser() == false) {
-            failed("Could not create the lfs user!\n");
-            exit(1);
-        } else {
-            passed("lfs user succefully created\n");
-        }
-    }
-
-    if (chownLfsFiles == false) {
-        failed("To setup .bashrc, .bash_profile or chown %s\n", cfg.buildPath);
-    }
-
+    // Starting from scratch? Then the build dir should be empty.
     if (cfg.phase == CROSS_TOOLS) {
-        header("Phase 1 - Cross Tools");
-        cfg.phase += 1;
+        if (isDirEmpty(cfg, cfg.buildPath) == false) {
+            warn("Build dir %s is not empty. Do you want to delete the contents y/n: ", cfg.buildPath);
+            fflush(stdout);
+            int input = getchar();
+            if (input == 'y')  {
+                if (!deleteDirContents(cfg, cfg.buildPath)) {
+                    failed("Could not empty %s\n", cfg.buildPath);
+                    exit(1);
+                }
+            } else {
+                warn("Continuing at your own risk!\n");
+            }
+        }
     }
 
-    if (cfg.phase == TEMP_TOOLS) {
-        header("Phase 2 - Temp Tools");
-        cfg.phase += 1;
-    }
-
-    if (cfg.phase == TEMP_SYSTEM) {
-        header("Phase 3 - Temp system");
-        cfg.phase += 1;
-    }
-
-    if (cfg.phase == LFS_BASE) {
-        header("Phase 4 - LFS Base System");
-        cfg.phase += 1;
-    }
-
-    if (cfg.phase == EXTRA_PACKAGES && cfg.bootstrap == false) {
-        header("Phase 5 - Building extra packages per the recipes!");
-    }
+    bool ok = runBuild(&cfg, &startPkgs);
+    strlistFree(&startPkgs);
 
     // -----------------------------------------------------------
     // Cleanup
     // -----------------------------------------------------------
-    recipelistFree(&recpies);
-    if (deleteLfsUser() == false) {
-        failed("Could not delete the LFS user\n");
-    } else {
-        passed("User 'lfs' deleted successfully\n");
+    if (vfsMounted(cfg)) {
+        if (unmountVfs(cfg)) {
+            passed("unmounted tmp fs\n");
+        } else {
+            failed("could not unmount tmpfs, check %s by hand\n", cfg.buildPath);
+        }
     }
-    
- 
-    return 0;
+
+    if (lfsUserExist()) {
+        if (deleteLfsUser() == false) {
+            failed("Could not delete the LFS user\n");
+        } else {
+            passed("User 'lfs' deleted successfully\n");
+        }
+    }
+
+    return ok ? 0 : 1;
 }
