@@ -260,10 +260,10 @@ static bool runBuild(Config *cfg, const StrList *startPkgs) {
     // Download into the real recipes dir so the tarballs are kept between builds
     RecipeList src;
     loadAllRecipes(*cfg, &src);
+    // Like the python edition this isn't fatal. A recipe whose tarball is missing
+    // fails on its own when its turn comes, and a package depending on it is skipped.
     if (!downloadTarballs(*cfg, &src, lastPhase)) {
-        failed("Some tarballs could not be downloaded. See the above messages.\n");
-        recipelistFree(&src);
-        return false;
+        warn("Some tarballs could not be downloaded. Recipes missing theirs will fail to build.\n");
     }
     recipelistFree(&src);
 
