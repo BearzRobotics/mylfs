@@ -10,5 +10,16 @@ description: |
 phase: 4
 order: 220
 critical: true
-buildsteps: "./configure --prefix=/usr\n\nmake\n\nif [ \"$RUN_TESTS\" = \"1\" ]; then\n    set +e\n    make check TESTSUITEFLAGS=-j4\n    set -e\nfi\n\nmake install \n"
+buildsteps: |
+  ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check TESTSUITEFLAGS=-j4
+      set -e
+  fi
+
+  make install
 builddeps: []

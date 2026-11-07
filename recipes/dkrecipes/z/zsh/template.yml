@@ -9,4 +9,39 @@ description: |
   Zsh is a UNIX shell similar to bash but with many enhancements, including advanced globbing, better completion, plugin support, and powerful scripting features. It is widely used as a user-friendly and highly customizable interactive shell.
 phase: 5
 builddeps: [make, gcc, glibc, ncurses]
-buildsteps: "sed -e 's/set_from_init_file/texinfo_&/' \\\n    -i Doc/Makefile.in\nsed -e 's/^main/int &/'      \\\n    -e 's/exit(/return(/'    \\\n    -i aczsh.m4 configure.ac \n\nsed -e 's/test = /&(char**)/' \\\n    -i configure.ac           \n\nautoconf\n\n\nsed -e 's|/etc/z|/etc/zsh/z|g' \\\n    -i Doc/*.*\n\n./configure --prefix=/usr            \\\n            --sysconfdir=/etc/zsh    \\\n            --enable-etcdir=/etc/zsh \\\n            --enable-cap             \\\n            --enable-gdbm                      \nmake                                           \n\nmakeinfo  Doc/zsh.texi --html      -o Doc/html \nmakeinfo  Doc/zsh.texi --plaintext -o zsh.txt  \nmakeinfo  Doc/zsh.texi --html --no-split --no-headers -o zsh.html\n\nmake install                                                    \nmake infodir=/usr/share/info install.info                       \nmake htmldir=/usr/share/doc/zsh-5.9/html install.html           \ninstall -v -m644 zsh.{html,txt} Etc/FAQ /usr/share/doc/zsh-{version}\n\n\ncat >> /etc/shells << \"EOF\"\n/bin/zsh\nEOF"
+buildsteps: |-
+  sed -e 's/set_from_init_file/texinfo_&/' \
+      -i Doc/Makefile.in
+  sed -e 's/^main/int &/'      \
+      -e 's/exit(/return(/'    \
+      -i aczsh.m4 configure.ac
+
+  sed -e 's/test = /&(char**)/' \
+      -i configure.ac
+
+  autoconf
+
+
+  sed -e 's|/etc/z|/etc/zsh/z|g' \
+      -i Doc/*.*
+
+  ./configure --prefix=/usr            \
+              --sysconfdir=/etc/zsh    \
+              --enable-etcdir=/etc/zsh \
+              --enable-cap             \
+              --enable-gdbm
+  make
+
+  makeinfo  Doc/zsh.texi --html      -o Doc/html
+  makeinfo  Doc/zsh.texi --plaintext -o zsh.txt
+  makeinfo  Doc/zsh.texi --html --no-split --no-headers -o zsh.html
+
+  make install
+  make infodir=/usr/share/info install.info
+  make htmldir=/usr/share/doc/zsh-5.9/html install.html
+  install -v -m644 zsh.{html,txt} Etc/FAQ /usr/share/doc/zsh-{version}
+
+
+  cat >> /etc/shells << "EOF"
+  /bin/zsh
+  EOF

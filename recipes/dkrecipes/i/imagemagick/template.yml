@@ -1,7 +1,7 @@
 name: imagemagick
 version: 7.1.1-43
 release: 1
-url: https://www.imagemagick.org/archive/releases/ImageMagick-7.1.1-43.tar.xz
+url: https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.1-43.tar.gz
 homepage: https://imagemagick.org/
 license: Apache-2.0
 summary: A powerful image manipulation toolkit

@@ -1,7 +1,7 @@
 name: dvd+rw-tools
 version: 7.1
 release: 1
-url: https://fy.chalmers.se/~appro/linux/DVD+RW/tools/dvd+rw-tools-7.1.tar.gz
+url: https://deb.debian.org/debian/pool/main/d/dvd+rw-tools/dvd+rw-tools_7.1.orig.tar.gz
 homepage: https://fy.chalmers.se/~appro/linux/DVD+RW/
 license: GPL-2.0-or-later
 summary: DVD and Blu-ray burning and formatting tools

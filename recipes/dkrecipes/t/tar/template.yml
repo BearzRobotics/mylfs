@@ -10,5 +10,18 @@ description: |
 phase: 4
 order: 350
 critical: true
-buildsteps: "FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr\n\nmake\n\nif [ \"$RUN_TESTS\" = \"1\" ]; then\n    set +e\n    make check \n    set -e\nfi\n\nmake install\n\nmake -C doc install-html docdir=/usr/share/doc/tar-{version}\n"
+buildsteps: |
+  FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr
+
+  make
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  make install
+
+  make -C doc install-html docdir=/usr/share/doc/tar-{version}
 builddeps: []

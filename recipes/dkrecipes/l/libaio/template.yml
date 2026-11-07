@@ -1,7 +1,7 @@
 name: libaio
 version: 0.3.113
 release: 1
-url: https://pagure.io/libaio/archive/libaio-0.3.113/libaio-0.3.113.tar.gz
+url: https://codeberg.org/jmoyer/libaio/releases/download/libaio-0.3.113/libaio-0.3.113.tar.gz
 homepage: https://pagure.io/libaio/
 license: LGPL-2.0-or-later
 summary: Linux kernel AIO access library

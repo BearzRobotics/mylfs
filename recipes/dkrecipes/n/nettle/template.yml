@@ -9,4 +9,12 @@ description: |
   The Nettle package contains the low-level cryptographic library that is designed to fit easily in many contexts.
 phase: 5
 builddeps: [make, glibc]
-buildsteps: "./configure --prefix=/usr --disable-static \nmake\n\n\nmake install &&\nchmod   -v   755 /usr/lib/lib{hogweed,nettle}.so \ninstall -v -m755 -d /usr/share/doc/nettle-{version}\ninstall -v -m644 nettle.{html,pdf} /usr/share/doc/nettle-{version}\n"
+buildsteps: |
+  ./configure --prefix=/usr --disable-static
+  make
+
+
+  make install &&
+  chmod   -v   755 /usr/lib/lib{hogweed,nettle}.so
+  install -v -m755 -d /usr/share/doc/nettle-{version}
+  install -v -m644 nettle.{html,pdf} /usr/share/doc/nettle-{version}

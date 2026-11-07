@@ -12,4 +12,11 @@ description: |
 phase: 5
 # the book recommends dbus, keyutils
 builddeps: [make, glibc, openssl, json-c, meson, ninja, swig]
-buildsteps: "mkdir build\ncd    build\n\nmeson setup --prefix=/usr --buildtype=release .. \nninja\n\nninja install\n"
+buildsteps: |
+  mkdir build
+  cd    build
+
+  meson setup --prefix=/usr --buildtype=release ..
+  ninja
+
+  ninja install

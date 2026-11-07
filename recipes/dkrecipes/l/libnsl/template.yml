@@ -9,4 +9,8 @@ description: |
   libnsl provides support for the NIS (Network Information Service) and NIS+ protocols. It is a separate implementation of the NIS client functionality which was traditionally part of glibc.
 phase: 5
 builddeps: [make, autoconf, automake, glibc, libtirpc]
-buildsteps: "./configure --sysconfdir=/etc --disable-static &&                          \nmake\n\nmake install\n"
+buildsteps: |
+  ./configure --sysconfdir=/etc --disable-static &&
+  make
+
+  make install

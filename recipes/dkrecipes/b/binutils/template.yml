@@ -11,5 +11,31 @@ phase: 4
 order: 90
 critical: true
 #builddeps: [ zlib, glibc ]
-buildsteps: "mkdir build\ncd build\n\n../configure --prefix=/usr       \\\n            --sysconfdir=/etc   \\\n            --enable-gold       \\\n            --enable-ld=default \\\n            --enable-plugins    \\\n            --enable-shared     \\\n            --disable-werror    \\\n            --enable-64-bit-bfd \\\n            --enable-new-dtags  \\\n            --with-system-zlib  \\\n            --enable-default-hash-style=gnu\n\nmake tooldir=/usr\n\nif [ \"$RUN_TESTS\" = \"1\" ]; then\n    set +e\n    make -k check \n    set -e\nfi\n\nmake tooldir=/usr install\n\nrm -f /usr/lib/lib{bfd,ctf,ctf-nobfd,gprofng,opcodes,sframe}.a\n"
+buildsteps: |
+  mkdir build
+  cd build
+
+  ../configure --prefix=/usr       \
+              --sysconfdir=/etc   \
+              --enable-gold       \
+              --enable-ld=default \
+              --enable-plugins    \
+              --enable-shared     \
+              --disable-werror    \
+              --enable-64-bit-bfd \
+              --enable-new-dtags  \
+              --with-system-zlib  \
+              --enable-default-hash-style=gnu
+
+  make tooldir=/usr
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make -k check
+      set -e
+  fi
+
+  make tooldir=/usr install
+
+  rm -f /usr/lib/lib{bfd,ctf,ctf-nobfd,gprofng,opcodes,sframe}.a
 builddeps: []

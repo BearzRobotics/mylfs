@@ -1,7 +1,7 @@
 name: business-isbn
 version: 3.011
 release: 1
-url: https://www.cpan.org/authors/id/B/BR/BRIANDFOY/Business-ISBN-3.011.tar.gz
+url: https://cpan.metacpan.org/authors/id/B/BR/BRIANDFOY/Business-ISBN-3.011.tar.gz
 homepage: https://metacpan.org/dist/Business-ISBN
 license: Artistic-1.0-Perl
 summary: Work with International Standard Book Numbers (ISBNs)

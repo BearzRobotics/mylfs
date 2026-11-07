@@ -1,7 +1,7 @@
 name: sg3_utils
 version: 1.48
 release: 1
-url: https://sg.danny.cz/sg/p/sg3_utils-1.48.tar.xz
+url: https://deb.debian.org/debian/pool/main/s/sg3-utils/sg3-utils_1.48.orig.tar.xz
 homepage: https://sg.danny.cz/sg/sg3_utils.html
 
 license: BSD-3-Clause

@@ -1,7 +1,7 @@
 name: cdrdao
 version: 1.2.4
 release: 1
-url: https://downloads.sourceforge.net/cdrdao/cdrdao-1.2.4.tar.bz2
+url: https://deb.debian.org/debian/pool/main/c/cdrdao/cdrdao_1.2.4.orig.tar.bz2
 homepage: https://sourceforge.net/projects/cdrdao/
 license: GPL-2.0-or-later
 summary: Disk-At-Once (DAO) CD recording tool

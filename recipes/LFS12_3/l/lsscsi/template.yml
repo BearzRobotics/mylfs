@@ -1,7 +1,7 @@
 name: lsscsi
 version: 0.32
 release: 1
-url: https://sg.danny.cz/scsi/lsscsi-0.32.tgz
+url: https://doug-gilbert.github.io/scsi/lsscsi-0.32.tgz
 homepage: https://sg.danny.cz/scsi/lsscsi.html
 
 license: GPL-3.0-or-later

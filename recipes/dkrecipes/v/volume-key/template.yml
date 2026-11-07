@@ -1,7 +1,7 @@
 name: volume-key
 version: 0.3.12
 release: 1
-url: https://pagure.io/volume_key/archive/volume_key-0.3.12/volume_key-volume_key-0.3.12.tar.gz
+url: https://github.com/felixonmars/volume_key/archive/refs/tags/volume_key-0.3.12.tar.gz
 homepage: https://pagure.io/volume_key
 license: GPL-2.0-or-later
 summary: Library for extracting, recovering, and manipulating encrypted volume keys

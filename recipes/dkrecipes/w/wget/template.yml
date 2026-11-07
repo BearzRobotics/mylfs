@@ -10,4 +10,7 @@ description: |
 phase: 5
 buildsystem: make
 builddeps: [libpsl]
-buildsteps: "./configure --prefix=/usr --sysconfdir=/etc  --with-ssl=openssl \nmake\nmake install\n"
+buildsteps: |
+  ./configure --prefix=/usr --sysconfdir=/etc  --with-ssl=openssl
+  make
+  make install

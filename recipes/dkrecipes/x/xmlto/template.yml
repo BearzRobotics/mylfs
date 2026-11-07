@@ -1,7 +1,7 @@
 name: xmlto
 version: 0.0.29
 release: 1
-url: https://pagure.io/xmlto/archive/0.0.29/xmlto-0.0.29.tar.gz
+url: https://deb.debian.org/debian/pool/main/x/xmlto/xmlto_0.0.29.orig.tar.bz2
 homepage: https://pagure.io/xmlto
 
 license: GPL-2.0-or-later

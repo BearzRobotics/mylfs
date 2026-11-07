@@ -12,5 +12,10 @@ summary: compression and decompression routines used by some programs.
 phase: 2
 order: 16
 critical: true
-buildsteps: "CHOST=$LFS_TGT\nCC=\"$CHOST-gcc\"  ./configure --prefix=/usr                 \n\nmake\nmake DESTDIR=$LFS install"
+buildsteps: |-
+  CHOST=$LFS_TGT
+  CC="$CHOST-gcc"  ./configure --prefix=/usr
+
+  make
+  make DESTDIR=$LFS install
 builddeps: []

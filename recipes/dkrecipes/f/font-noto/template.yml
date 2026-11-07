@@ -1,7 +1,7 @@
 name: fonts-noto
 version: 20240401
 release: 1
-url: https://noto-website-2.storage.googleapis.com/pkgs/Noto-unhinted.zip
+url: https://github.com/googlefonts/noto-fonts/archive/refs/tags/v20201206-phase3.tar.gz
 homepage: https://www.google.com/get/noto/
 license: SIL Open Font License
 summary: Google’s high-coverage Unicode font family
@@ -10,10 +10,10 @@ description: |
   encoded in Unicode. This package installs the core unhinted OTF fonts.
 
 phase: 5
-builddeps: [fontconfig, libarchive]
+builddeps: [fontconfig]
 buildsystem: none
 
 buildsteps: |
   mkdir -pv /usr/share/fonts/opentype/noto
-  unzip -j -o ../Noto-unhinted.zip '*.otf' -d /usr/share/fonts/opentype/noto
+  find archive/unhinted -type f \( -name '*.otf' -o -name '*.ttf' \) -exec install -v -m644 {} /usr/share/fonts/opentype/noto/ \;
   fc-cache -f

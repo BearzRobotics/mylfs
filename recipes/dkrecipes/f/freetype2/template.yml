@@ -11,4 +11,18 @@ description: |
   The FreeType2 package contains a library which allows applications to properly render TrueType fonts
 phase: 5
 builddeps: [make, glibc, zlib, libpng, brotli, bzip2, which]
-buildsteps: "tar -xf ../freetype-doc-2.13.3.tar.xz --strip-components=2 -C docs\n\nsed -ri \"s:.*(AUX_MODULES.*valid):\\1:\" modules.cfg \n\nsed -r \"s:.*(#.*SUBPIXEL_RENDERING) .*:\\1:\" \\\n    -i include/freetype/config/ftoption.h \n\n./configure --prefix=/usr --enable-freetype-config --disable-static\nmake\n\nmake install\n\ncp -v -R docs -T /usr/share/doc/freetype-{version}\nrm -v /usr/share/doc/freetype-2.13.3/freetype-config.1\n"
+buildsteps: |
+  tar -xf ../freetype-doc-2.13.3.tar.xz --strip-components=2 -C docs
+
+  sed -ri "s:.*(AUX_MODULES.*valid):\1:" modules.cfg
+
+  sed -r "s:.*(#.*SUBPIXEL_RENDERING) .*:\1:" \
+      -i include/freetype/config/ftoption.h
+
+  ./configure --prefix=/usr --enable-freetype-config --disable-static
+  make
+
+  make install
+
+  cp -v -R docs -T /usr/share/doc/freetype-{version}
+  rm -v /usr/share/doc/freetype-2.13.3/freetype-config.1

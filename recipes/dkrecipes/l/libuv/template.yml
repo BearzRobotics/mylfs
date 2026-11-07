@@ -9,4 +9,9 @@ description: |
   The libuv package is a multi-platform support library with a focus on asynchronous I/O.
 phase: 5
 builddeps: [make, glibc]
-buildsteps: "sh autogen.sh                              \n./configure --prefix=/usr --disable-static \nmake \n\nmake install\n"
+buildsteps: |
+  sh autogen.sh
+  ./configure --prefix=/usr --disable-static
+  make
+
+  make install

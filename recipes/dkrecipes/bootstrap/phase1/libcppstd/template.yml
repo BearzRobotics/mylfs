@@ -7,5 +7,28 @@ summary: stub of libcppstd
 phase: 1
 order: 6
 critical: true
-buildsteps: "\nls ../../gcc \ncd ../../gcc/source\n\nmkdir -vp build-libstdc++\ncd build-libstdc++\n\n    ../libstdc++-v3/configure \\\n        --host=$LFS_TGT                     \\\n        --build=$(../config.guess)          \\\n        --prefix=/usr                       \\\n        --disable-multilib                  \\\n        --disable-nls                       \\\n        --disable-libstdcxx-pch             \\\n        --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/{version}\n\n    make\n    make DESTDIR=$LFS install\n\n    rm -v $LFS/usr/lib/lib{stdc++{,exp,fs},supc++}.la\n\n    cd ../..\n    rm -rf source\n"
+buildsteps: |
+
+  ls ../../gcc
+  cd ../../gcc/source
+
+  mkdir -vp build-libstdc++
+  cd build-libstdc++
+
+      ../libstdc++-v3/configure \
+          --host=$LFS_TGT                     \
+          --build=$(../config.guess)          \
+          --prefix=/usr                       \
+          --disable-multilib                  \
+          --disable-nls                       \
+          --disable-libstdcxx-pch             \
+          --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/{version}
+
+      make
+      make DESTDIR=$LFS install
+
+      rm -v $LFS/usr/lib/lib{stdc++{,exp,fs},supc++}.la
+
+      cd ../..
+      rm -rf source
 builddeps: []

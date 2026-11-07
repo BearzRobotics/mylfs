@@ -9,4 +9,9 @@ description: |
   ugrep is an ultra-fast grep replacement with full Unicode support, syntax highlighting, interactive query interface, and support for many modern search features not available in traditional grep.
 phase: 5
 builddeps: [make, gcc, glibc, pcre2, ncurses]
-buildsteps: "./configure --prefix=/usr\n            \nmake \n\nmake install\n"
+buildsteps: |
+  ./configure --prefix=/usr
+
+  make
+
+  make install

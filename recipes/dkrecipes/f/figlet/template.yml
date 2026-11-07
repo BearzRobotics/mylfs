@@ -11,4 +11,21 @@ description: |
   FIGlet is a program that creates large characters out of ordinary screen characters. It is commonly used for ASCII art banners and text decoration in the terminal.
 phase: 5
 builddeps: [make, gcc, glibc]
-buildsteps: "# remove gnu macros for ensuring c++ compatiblity\n#sed -i '/__BEGIN_DECLS/d' utf8.h\n#sed -i '/__END_DECLS/d' utf8.h\n\n# Figlet hard codes it's install path to /usr/local.\n# this lets us change it to our Prefix\nsed -i 's|/usr/local|$(PREFIX)|g' Makefile\n\nmake PREFIX=/usr install\n\n# install fonts\ntar -xf ../figlet-fonts-0.0.1.tar.gz \ncd figlet-fonts-figlet-fonts-0.0.1\n\n# copy fonts in place\nmkdir -vp /usr/share/figlet\ncp -vf * /usr/share/figlet/\n"
+buildsteps: |
+  # remove gnu macros for ensuring c++ compatiblity
+  #sed -i '/__BEGIN_DECLS/d' utf8.h
+  #sed -i '/__END_DECLS/d' utf8.h
+
+  # Figlet hard codes it's install path to /usr/local.
+  # this lets us change it to our Prefix
+  sed -i 's|/usr/local|$(PREFIX)|g' Makefile
+
+  make PREFIX=/usr install
+
+  # install fonts
+  tar -xf ../figlet-fonts-0.0.1.tar.gz
+  cd figlet-fonts-figlet-fonts-0.0.1
+
+  # copy fonts in place
+  mkdir -vp /usr/share/figlet
+  cp -vf * /usr/share/figlet/

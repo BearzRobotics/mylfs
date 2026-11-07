@@ -1,12 +1,24 @@
 name: lsscsi
 version: 0.32
 release: 1
-url: https://sg.danny.cz/scsi/lsscsi-0.32.tgz
+url: https://doug-gilbert.github.io/scsi/lsscsi-0.32.tgz
 homepage: https://sg.danny.cz/scsi/lsscsi.html
 license: GPL-3.0-or-later
 summary: GNU core utilities
 description: "This package contains the basic file, shell and text manipulation utilities which are expected to exist on every operating system. \n"
 phase: 5
 buildsystem: make
-buildsteps: "#The build sequence is now:\n#  ./autogen.sh ; ./configure ; make ; make install\n#or\n#  ./bootstrap ; ./configure ; make ; make install\n\n\n./autogen.sh \n./configure --prefix=/usr \n\nmake \n\nmake install\n"
+buildsteps: |
+  #The build sequence is now:
+  #  ./autogen.sh ; ./configure ; make ; make install
+  #or
+  #  ./bootstrap ; ./configure ; make ; make install
+
+
+  ./autogen.sh
+  ./configure --prefix=/usr
+
+  make
+
+  make install
 builddeps: []

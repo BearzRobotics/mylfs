@@ -8,4 +8,13 @@ summary:
 description: ""
 phase: 5
 builddeps: [make, glibc]
-buildsteps: "patch -Np1 -i ../patches/libpng-1.6.47-apng.patch\n\n\n./configure --prefix=/usr --disable-static \nmake\n\nmake install\nmkdir -vp /usr/share/doc/libpng-{version}\ncp -vf README libpng-manual.txt /usr/share/doc/libpng-{version}\n"
+buildsteps: |
+  patch -Np1 -i ../patches/libpng-1.6.47-apng.patch
+
+
+  ./configure --prefix=/usr --disable-static
+  make
+
+  make install
+  mkdir -vp /usr/share/doc/libpng-{version}
+  cp -vf README libpng-manual.txt /usr/share/doc/libpng-{version}

@@ -2,7 +2,7 @@
 name: linuxfirmware
 version: 20250410
 release: 1
-url: https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/snapshot/linux-firmware-20250410.tar.gz
+url: https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-20250410.tar.xz
 homepage: https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
 
 license: Various
@@ -13,5 +13,5 @@ description: |
 phase: 5
 
 buildsteps: |
-  tar -xvf ../linux-firmware-20250410.tar.gz -C /lib/firmware --strip-component=1
+  tar -xvf ../linux-firmware-20250410.tar.xz -C /lib/firmware --strip-component=1
   

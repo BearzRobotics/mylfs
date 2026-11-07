@@ -13,4 +13,27 @@ phase: 4
 order: 95
 critical: true
 builddeps: [make, glibc]
-buildsteps: "./configure --prefix=/usr    \\\n            --enable-cxx     \\\n            --disable-static \\\n            --docdir=/usr/share/doc/gmp-{version}\n\nmake\nmake html\n\nif [ \"$RUN_TESTS\" = \"1\" ]; then\n    set +e\n    make check \n    set -e\nfi\n\n#PASS_COUNT=$(awk '/# PASS:/{total+=$3} ; END{print total}' $TESTLOG_DIR/gmp.log)\n#if [ \"$PASS_COUNT\" != \"\" ];\n#then\n#    echo \"ERROR: GMP tests failed. Check /sources/stage6/gmp_test.log for more info.\"\n#    exit -1\n#fi\n\nmake install\nmake install-html\n"
+buildsteps: |
+  ./configure --prefix=/usr    \
+              --enable-cxx     \
+              --disable-static \
+              --docdir=/usr/share/doc/gmp-{version}
+
+  make
+  make html
+
+  if [ "$RUN_TESTS" = "1" ]; then
+      set +e
+      make check
+      set -e
+  fi
+
+  #PASS_COUNT=$(awk '/# PASS:/{total+=$3} ; END{print total}' $TESTLOG_DIR/gmp.log)
+  #if [ "$PASS_COUNT" != "" ];
+  #then
+  #    echo "ERROR: GMP tests failed. Check /sources/stage6/gmp_test.log for more info."
+  #    exit -1
+  #fi
+
+  make install
+  make install-html

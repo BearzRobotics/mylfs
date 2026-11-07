@@ -9,4 +9,10 @@ description: |
   The libxslt package contains XSLT libraries used for extending libxml2 libraries to support XSLT files
 phase: 5
 builddeps: [make, glibc, libxml2, docbook-xml, docbook-xsl]
-buildsteps: "./configure --prefix=/usr                          \\\n            --disable-static                       \\\n            --docdir=/usr/share/doc/libxslt-{version} \nmake\n\nmake install\n"
+buildsteps: |
+  ./configure --prefix=/usr                          \
+              --disable-static                       \
+              --docdir=/usr/share/doc/libxslt-{version}
+  make
+
+  make install
